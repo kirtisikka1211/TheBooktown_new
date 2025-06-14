@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donate</title>
+    <link rel="stylesheet" href="../styles/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div id="navbar-container"></div>
+
+    <body>
+        <header>
+            <div class="container">
+                <a href="index.html" class="logo">
+                    <img src="../images/logo.png" alt="The Booktown Foundation">
+                </a>
+                <nav>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="donate.html">Donate</a></li>
+                        <li><a href="books.html">Books</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </nav>
+                <div class="auth-buttons">
+                    <a href="signup.html" class="btn btn-outline">Sign Up</a>
+                    <a href="login.html" class="btn btn-primary">Login</a>
+                </div>
+                <button class="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </header>
+    
+        <main>
+            <section class="page-header">
+                <div class="container">
+                    <h1>Donate a Book</h1>
+                    <p>Upload an image of the book to start the donation process</p>
+                </div>
+            </section>
+    
+            <section class="submit-photo-form">
+                <div class="container">
+                    <div class="upload-box" style="text-align: center; padding: 20px; border: 2px dashed #ccc; border-radius: 10px;">
+                        <h2>Upload Your Book Image</h2>
+                        <input type="file" id="book-image" accept="image/*" style="margin-top: 10px; padding: 10px;">
+                        <p style="margin-top: 10px;">Accepted formats: JPG, PNG | Max Size: 5MB</p>
+                    </div>
+                    
+                    <form id="donation-form" style="display: none; margin-top: 30px;">
+                     
+                        <div class="form-group">
+                            <label for="fullname">Title</label>
+                            <input type="text" id="fullname" name="fullname" placeholder="Title of Book" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Author</label>
+                            <input type="email" id="email" name="email" placeholder="Author" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="username">Genre</label>
+                            <input type="text" id="username" name="username" placeholder="Genre of Book" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Summary </label>
+                            <input type="password" id="password" name="password" placeholder="Summary" required>
+                        </div>
+                      
+                      
+                        <button type="submit" class="btn btn-primary btn-block">Submit</button>
+                    </form> 
+              
+                </div>
+            </section>
+        </main>
+    
+    <div id="footer-container"></div>
+
+    <script src="../scripts/components.js"></script>
+
+    <script src="../scripts/ocr.js"></script>
+</body>
+</html>

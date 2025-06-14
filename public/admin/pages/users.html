@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management - Admin Portal</title>
+    <link rel="stylesheet" href="../styles/admin.css">
+    <link rel="stylesheet" href="../../styles/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="admin-dashboard">
+    <div class="admin-container">
+         <!-- Sidebar Navigation -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <img src="../../images/logo.png" alt="Booktown Logo" class="admin-logo">
+                <h2>Admin Portal</h2>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="index.html" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="moderation.html" class="nav-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Moderation</span>
+                    <span class="badge">12</span>
+                </a>
+                <a href="users.html" class="nav-item active">
+                    <i class="fas fa-users"></i>
+                    <span>Users</span>
+                </a>
+                <a href="books.html" class="nav-item">
+                    <i class="fas fa-book"></i>
+                    <span>Books</span>
+                </a>
+                <a href="analytics.html" class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="admin-profile">
+                    <img src="../../images/admin-avatar.jpg" alt="Admin Avatar">
+                    <div class="admin-info">
+                        <strong>Admin User</strong>
+                        <small>Super Admin</small>
+                    </div>
+                </div>
+                <a href="../../pages/login.html" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </aside>
+        
+        <main class="admin-main">
+            
+            <div class="admin-content">
+                <div class="welcome-banner" style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('../image-4@2x.png') center/cover;">
+                    <h1><i class="fas fa-users"></i> User Management</h1>
+                    <p>Manage all registered users and their permissions</p>
+                </div>
+                
+                <div class="user-stats-cards">
+                    <div class="stat-card">
+                        <div class="icon" style="background-color: #4a7fdb;">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="info">
+                            <h3>1,248</h3>
+                            <p>Total Users</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="icon" style="background-color: #6bbd68;">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="info">
+                            <h3>1,032</h3>
+                            <p>Active Users</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="icon" style="background-color: #ff9a56;">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="info">
+                            <h3>428</h3>
+                            <p>Donors</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="users-table-container">
+                    <div class="table-actions">
+                        <select class="filter-select">
+                            <option>All User Types</option>
+                            <option>Readers</option>
+                            <option>Donors</option>
+                            <option>Volunteers</option>
+                        </select>
+                        <select class="filter-select">
+                            <option>Sort by: Newest</option>
+                            <option>Sort by: Name</option>
+                            <option>Sort by: Activity</option>
+                        </select>
+                    </div>
+                    
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Joined</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="user-cell">
+                                        <img src="../../images/user1.jpg" alt="User Avatar">
+                                        <span>Sarah Johnson</span>
+                                    </div>
+                                </td>
+                                <td>sarah@example.com</td>
+                                <td><span class="badge role-donor">Donor</span></td>
+                                <td>Jun 12, 2022</td>
+                                <td><span class="badge status-active">Active</span></td>
+                                <td>
+                                    <button class="btn-icon" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn-icon" title="View Profile">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <!-- More user rows -->
+                        </tbody>
+                    </table>
+                    
+                    <div class="table-footer">
+                        <div class="showing-entries">
+                            Showing 1 to 10 of 1,248 entries
+                        </div>
+                        <div class="pagination">
+                            <button class="btn btn-outline" disabled><i class="fas fa-chevron-left"></i></button>
+                            <button class="btn btn-primary">1</button>
+                            <button class="btn btn-outline">2</button>
+                            <button class="btn btn-outline">3</button>
+                            <span>...</span>
+                            <button class="btn btn-outline">125</button>
+                            <button class="btn btn-outline"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../scripts/admin.js"></script>
+</body>
+</html>

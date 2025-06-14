@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collapsible Sidebar</title>
+    
+    <link rel="stylesheet" href="../styles/admin.css">
+    <link rel="stylesheet" href="../../styles/style.css">
+    
+    <style>
+        /* Basic Styling for Sidebar */
+        .admin-sidebar {
+            width: 250px;
+            background-color: #2f3b52;
+            color: white;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            transition: all 0.3s ease;
+        }
+
+        /* Sidebar Header */
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: #1d2a3d;
+        }
+
+        .sidebar-header h2 {
+            margin: 0;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar-nav {
+            margin-top: 20px;
+        }
+
+        .sidebar-nav .nav-item {
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .sidebar-nav .nav-item:hover {
+            background-color: #1d2a3d;
+        }
+
+        .sidebar-nav .nav-item.active {
+            background-color: #1d2a3d;
+        }
+
+        .sidebar-footer {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            padding: 10px;
+            text-align: center;
+        }
+
+        /* Collapsed State */
+        .admin-sidebar.collapsed {
+            width: 80px; /* Reduce the width for collapsed state */
+        }
+
+        .admin-sidebar.collapsed .sidebar-header h2 {
+            display: none;
+        }
+
+        .admin-sidebar.collapsed .sidebar-nav .nav-item span {
+            display: none;
+        }
+
+        .admin-sidebar.collapsed .sidebar-nav .nav-item i {
+            font-size: 20px;
+        }
+
+        /* Toggle Button */
+        .sidebar-toggle-btn {
+            font-size: 30px;
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Hover effect for the toggle button */
+        .sidebar-toggle-btn:hover {
+            color: #d1d1d1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+        <!-- Sidebar Header -->
+        <div class="sidebar-header">
+            <img src="../images/logo.png" alt="Booktown Logo" class="admin-logo">
+            <h2>NGOs</h2>
+            <button class="sidebar-toggle-btn" onclick="toggleSidebar()">☰</button> <!-- Sidebar Toggle Button -->
+        </div>
+
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar-nav">
+            <a href="index.html" class="nav-item active">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="moderation.html" class="nav-item">
+                <i class="fas fa-shield-alt"></i>
+                <span>Moderation</span>
+                <span class="badge">12</span>
+            </a>
+            <a href="users.html" class="nav-item">
+                <i class="fas fa-users"></i>
+                <span>Users</span>
+            </a>
+            <a href="books.html" class="nav-item">
+                <i class="fas fa-book"></i>
+                <span>Books</span>
+            </a>
+            <a href="analytics.html" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Analytics</span>
+            </a>
+        </nav>
+
+        <!-- Sidebar Footer -->
+        <div class="sidebar-footer">
+            <div class="admin-profile">
+                <img src="../images/admin-avatar.jpg" alt="Admin Avatar">
+                <div class="admin-info">
+                    <strong>Admin User</strong>
+                    <small>Super Admin</small>
+                </div>
+            </div>
+            <a href="../login.html" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
+    </aside>
+
+    <script>
+        // JavaScript for Sidebar Toggle
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.admin-sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+    </script>
+
+</body>
+</html>

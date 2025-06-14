@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NGOs - The Booktown Foundation</title>
+    <link rel="stylesheet" href="../styles/admin.css">
+    <link rel="stylesheet" href="../../styles/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.css">
+</head>
+<body class="admin-dashboard">
+    <div class="admin-container">
+        <!-- Sidebar Navigation -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <img src="../../images/logo.png" alt="Booktown Logo" class="admin-logo">
+                <h2>Admin Portal</h2>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="index.html" class="nav-item active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="moderation.html" class="nav-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Moderation</span>
+                    <span class="badge">12</span>
+                </a>
+                <a href="users.html" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>Users</span>
+                </a>
+                <a href="books.html" class="nav-item">
+                    <i class="fas fa-book"></i>
+                    <span>Books</span>
+                </a>
+                <a href="analytics.html" class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics</span>
+                </a>
+                
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="admin-profile">
+                    <img src="../../images/admin-avatar.jpg" alt="Admin Avatar">
+                    <div class="admin-info">
+                        <strong>Admin User</strong>
+                        <small>Super Admin</small>
+                    </div>
+                </div>
+                <a href="../../pages/login.html" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            
+            <div class="admin-content">
+                <div class="welcome-banner" style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('../image-4@2x.png') center/cover;">
+                    <h1>Welcome to Your Dashboard</h1>
+                    <p>Manage the Booktown Foundation's operations efficiently</p>
+                </div>
+                
+                <div class="stats-grid">
+                    <!-- Stat Cards -->
+                    <div class="stat-card">
+                        <div class="icon" style="background-color: #4a7fdb;">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="info">
+                            <h3>1,248</h3>
+                            <p>Total Users</p>
+                            <span class="trend up"><i class="fas fa-arrow-up"></i> 12%</span>
+                        </div>
+                    </div>
+                    
+                    <!-- More stat cards... -->
+                </div>
+                
+                <div class="charts-section">
+                    <div class="chart-card">
+                        <h3><i class="fas fa-chart-line"></i> Monthly Donations</h3>
+                        <div class="chart-container">
+                            <canvas id="donationsChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <h3><i class="fas fa-book"></i> Book Categories</h3>
+                        <div class="chart-container">
+                            <canvas id="categoriesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="recent-activity">
+                    <h3><i class="fas fa-clock"></i> Recent Activity</h3>
+                    <!-- Activity feed items -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <script src="../scripts/admin.js"></script>
+    <script src="../../scripts/script.js"></script>
+</body>
+</html>
