@@ -1,3 +1,6 @@
+// Groq API Key
+const GROQ_API_KEY = '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';
+
 // Function to fetch all books
 async function fetchAllBooks() {
     try {
@@ -11,10 +14,6 @@ async function fetchAllBooks() {
                 'Authorization': `Bearer ${token}`
             }
         });
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch books');
-        }
 
         const data = await response.json();
         return data.books;
@@ -44,8 +43,12 @@ function createBookCard(book) {
     const statusClass = book.status === 'approved' ? 'available' : 
                        book.status === 'rejected' ? 'unavailable' : 'pending';
     
+    // Ensure image_url is properly formatted
+    const imageUrl = book.image_url || '../../images/default-book.jpg';
+    console.log('Book image URL:', imageUrl);
+    
     card.innerHTML = `
-        <div class="book-cover" style="background-image: url('${book.image_url || '../../images/default-book.jpg'}');">
+        <div class="book-cover" style="background-image: url('${imageUrl}');">
             <span class="book-status ${statusClass}">${book.status.charAt(0).toUpperCase() + book.status.slice(1)}</span>
         </div>
         <div class="book-details">
@@ -84,12 +87,21 @@ async function displayBooks() {
 }
 
 // Function to show toast notifications
-function showToast(message, type = 'success') {
+function showToast(message, type = 'info') {
     const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
+    toast.className = `toast toast-${type}`;
     toast.textContent = message;
+    
     document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
+    
+    // Trigger animation
+    setTimeout(() => toast.classList.add('show'), 100);
+    
+    // Remove toast after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
 
 // Function to handle book editing
@@ -148,8 +160,12 @@ async function viewBookDetails(bookId) {
         const data = await response.json();
         const book = data.book;
 
+        // Ensure image_url is properly formatted
+        const imageUrl = book.image_url || '../../images/default-book.jpg';
+        console.log('Book details image URL:', imageUrl);
+
         // Populate the details modal
-        document.getElementById('detailBookImage').src = book.image_url || '../../images/default-book.jpg';
+        document.getElementById('detailBookImage').src = imageUrl;
         document.getElementById('detailTitle').textContent = book.title;
         document.getElementById('detailAuthor').textContent = book.author;
         document.getElementById('detailGenre').textContent = book.genre || 'Not specified';
@@ -170,7 +186,17 @@ async function viewBookDetails(bookId) {
 // Function to close modal
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
-    modal.classList.remove('active');
+    if (modal) {
+        modal.classList.remove('active');
+        // Reset form if it's the add book modal
+        if (modalId === 'addBookModal') {
+            const form = document.getElementById('addBookForm');
+            if (form) {
+                form.reset();
+                form.removeEventListener('submit', handleAddBook);
+            }
+        }
+    }
 }
 
 // Function to handle form submission
@@ -209,6 +235,180 @@ async function handleEditSubmit(event) {
     }
 }
 
+// Function to handle book addition
+async function handleAddBook(e) {
+    e.preventDefault();
+
+    // Get form values
+    const title = document.getElementById('addTitle')?.value;
+    const author = document.getElementById('addAuthor')?.value;
+    const genre = document.getElementById('addGenre')?.value;
+    const summary = document.getElementById('addSummary')?.value;
+    const imageFile = document.getElementById('addImage')?.files[0];
+
+    console.log('Form values:', { title, author, genre, summary, imageFile });
+
+    // Validate all fields
+    if (!title || !author || !genre || !summary || !imageFile) {
+        showToast('Please fill in all fields and upload an image', 'error');
+        return;
+    }
+
+    // Show loading state
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Adding Book...';
+    submitBtn.disabled = true;
+
+    try {
+        // Create FormData to send both file and text data
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('author', author);
+        formData.append('genre', genre);
+        formData.append('summary', summary);
+        formData.append('image', imageFile);
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showToast('Please login to add books', 'error');
+            window.location.href = '/pages/login.html';
+            return;
+        }
+
+        console.log('Sending request to add book...');
+        const response = await fetch('http://localhost:3001/api/admin/add-book', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData
+        });
+
+        console.log('Response status:', response.status);
+        const result = await response.json();
+        console.log('Response data:', result);
+
+        if (!response.ok) {
+            throw new Error(result.error || result.details || 'Failed to add book');
+        }
+
+        showToast(result.message || 'Book added successfully!', 'success');
+        // Reset form
+        e.target.reset();
+        // Close modal
+        closeModal('addBookModal');
+        // Refresh book list
+        displayBooks();
+    } catch (error) {
+        console.error('Add book error:', error);
+        showToast(error.message || 'Failed to add book. Please try again.', 'error');
+    } finally {
+        // Reset button state
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+}
+
+// Function to open the add book modal
+function openAddBookModal() {
+    const modal = document.getElementById('addBookModal');
+    if (modal) {
+        modal.classList.add('active');
+        // Add form submit event listener
+        const form = document.getElementById('addBookForm');
+        if (form) {
+            form.addEventListener('submit', handleAddBook);
+        }
+    }
+}
+
+// Function to check if all required fields are filled
+function areFieldsFilled() {
+    const titleInput = document.getElementById('addTitle');
+    const authorInput = document.getElementById('addAuthor');
+    const genreInput = document.getElementById('addGenre');
+    
+    return titleInput?.value.trim() && 
+           authorInput?.value.trim() && 
+           genreInput?.value.trim();
+}
+
+// Function to clean up the summary text
+function cleanSummaryText(text) {
+    return text.replace(/<think>[\s\S]*?<\/think>/g, '')
+              .replace(/^Orphaned as a baby,/, '')
+              .trim();
+}
+
+// Function to generate summary using Groq API
+async function generateSummary(bookDetails) {
+    try {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${GROQ_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: "deepseek-r1-distill-llama-70b",
+                messages: [
+                    {
+                        role: "user",
+                        content: `Generate a concise book summary based on these details:\nTitle: ${bookDetails.title}\nAuthor: ${bookDetails.author}\nGenre: ${bookDetails.genre}\n\nPlease provide a brief, engaging summary that captures the essence of the book.`
+                    }
+                ],
+                temperature: 0.6,
+                max_tokens: 4096,
+                top_p: 0.95,
+                stream: false
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to generate summary');
+        }
+
+        const data = await response.json();
+        return data.choices[0].message.content.trim();
+    } catch (error) {
+        console.error('Error generating summary:', error);
+        throw error;
+    }
+}
+
+// Function to generate book summary
+async function generateBookSummary() {
+    if (!areFieldsFilled()) {
+        showToast('Please fill in title, author, and genre first', 'error');
+        return;
+    }
+
+    const generateSummaryBtn = document.getElementById('generate-summary');
+    const summaryTextarea = document.getElementById('addSummary');
+
+    try {
+        generateSummaryBtn.disabled = true;
+        generateSummaryBtn.textContent = 'Generating...';
+        
+        const bookDetails = {
+            title: document.getElementById('addTitle').value.trim(),
+            author: document.getElementById('addAuthor').value.trim(),
+            genre: document.getElementById('addGenre').value.trim()
+        };
+
+        const summary = await generateSummary(bookDetails);
+        const cleanedSummary = cleanSummaryText(summary);
+        summaryTextarea.value = cleanedSummary;
+        showToast('Summary generated successfully!', 'success');
+    } catch (error) {
+        showToast('Failed to generate summary. Please try again.', 'error');
+    } finally {
+        generateSummaryBtn.disabled = false;
+        generateSummaryBtn.textContent = 'Generate Summary';
+    }
+}
+
 // Initialize the page
 document.addEventListener('DOMContentLoaded', () => {
     displayBooks();
@@ -239,11 +439,75 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add event listener for edit form submission
     document.getElementById('editBookForm').addEventListener('submit', handleEditSubmit);
+    
+    // Add event listener for add book form submission
+    document.getElementById('addBookForm').addEventListener('submit', handleAddBook);
 
     // Close modals when clicking outside
     window.addEventListener('click', (event) => {
         if (event.target.classList.contains('modal')) {
-            event.target.classList.remove('active');
+            const modalId = event.target.id;
+            closeModal(modalId);
         }
     });
+
+    // Add event listeners for close buttons
+    document.querySelectorAll('.modal .close-btn, .modal .cancel-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const modal = button.closest('.modal');
+            if (modal) {
+                closeModal(modal.id);
+            }
+        });
+    });
+
+    // Add input event listeners for summary generation
+    const titleInput = document.getElementById('addTitle');
+    const authorInput = document.getElementById('addAuthor');
+    const genreInput = document.getElementById('addGenre');
+    const generateSummaryBtn = document.getElementById('generate-summary');
+    
+    let debounceTimer;
+
+    [titleInput, authorInput, genreInput].forEach(input => {
+        if (input) {
+            input.addEventListener('input', function() {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    if (areFieldsFilled()) {
+                        generateBookSummary();
+                    }
+                }, 1000); // Wait for 1 second after the last input before generating
+            });
+        }
+    });
+
+    // Add click event listener for generate summary button
+    if (generateSummaryBtn) {
+        generateSummaryBtn.addEventListener('click', generateBookSummary);
+    }
+
+    // Add file input validation
+    const imageInput = document.getElementById('addImage');
+    if (imageInput) {
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const fileSizeMB = file.size / (1024 * 1024);
+                const validTypes = ['image/jpeg', 'image/png'];
+
+                if (!validTypes.includes(file.type)) {
+                    showToast('Please upload a JPG or PNG image.', 'error');
+                    imageInput.value = '';
+                    return;
+                }
+
+                if (fileSizeMB > 5) {
+                    showToast('File size must be under 5MB.', 'error');
+                    imageInput.value = '';
+                    return;
+                }
+            }
+        });
+    }
 }); 

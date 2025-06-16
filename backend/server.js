@@ -34,10 +34,12 @@ app.use(express.json());
 app.use(cors());
 
 // Serve static files
-app.use('/css', express.static(path.join(rootDir, 'css')));
-app.use('/js', express.static(path.join(rootDir, 'js')));
+app.use(express.static(path.join(rootDir))); // Serve all static files from root
+app.use('/styles', express.static(path.join(rootDir, 'styles')));
+app.use('/scripts', express.static(path.join(rootDir, 'scripts')));
 app.use('/images', express.static(path.join(rootDir, 'images')));
 app.use('/components', express.static(path.join(rootDir, 'components')));
+app.use('/book_images', express.static(path.join(rootDir, 'book_images')));
 
 // Create uploads directory
 if (!fs.existsSync('uploads')) {
@@ -83,6 +85,7 @@ const requireAdmin = (req, res, next) => {
     }
     next();
 };
+
 async function ensureBucketExists() {
     try {
         // Check if bucket exists
@@ -132,45 +135,26 @@ ensureBucketExists().then(success => {
     }
 });
 
-// Page routes
-app.get('/', (req, res) => {
-    res.sendFile(path.join(pagesDir, 'index.html'));
-});
+// API Routes
+// Get all users (admin only)
+app.get('/api/users', authenticateToken, requireAdmin, async (req, res) => {
+    try {
+        const { data: users, error } = await supabase
+            .from('users')
+            .select('*')
+            .order('created_at', { ascending: false });
 
-const pages = ['donate', 'about', 'books', 'contact', 'dashboard', 'login', 'signup'];
-pages.forEach(page => {
-    app.get(`/pages/${page}`, (req, res) => {
-        res.sendFile(path.join(pagesDir, `${page}.html`));
-    });
-});
+        if (error) {
+            console.error('Error fetching users:', error);
+            return res.status(500).json({ error: 'Failed to fetch users' });
+        }
 
-// Handle direct access to HTML files
-pages.forEach(page => {
-    app.get(`/${page}.html`, (req, res) => {
-        res.redirect(`/pages/${page}`);
-    });
-});
-
-// Admin routes
-app.get('/admin', (req, res) => {
-    res.sendFile(path.join(adminDir, 'pages', 'index.html'));
-});
-
-app.get('/admin/:page', (req, res) => {
-    const adminPage = req.params.page;
-    res.sendFile(path.join(adminDir, 'pages', `${adminPage}.html`));
-});
-
-// Catch-all route for 404
-app.use((req, res, next) => {
-    if (req.method === 'GET' && !req.path.startsWith('/api')) {
-        res.status(404).sendFile(path.join(pagesDir, '404.html'));
-    } else {
-        next();
+        res.json({ users });
+    } catch (error) {
+        console.error('Server error:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
-
-// Routes
 
 // Auth Routes
 app.post('/api/signup', async (req, res) => {
@@ -461,6 +445,98 @@ app.get('/api/my-books', authenticateToken, async (req, res) => {
     }
 });
 
+app.post('/api/admin/add-book', authenticateToken, requireAdmin, upload.single('image'), async (req, res) => {
+    try {
+        console.log('Admin add book request received');
+        const { title, author, genre, summary } = req.body;
+        const imageFile = req.file;
+
+        console.log('Request data:', { title, author, genre, summary, imageFile });
+
+        // Validate required fields
+        if (!title || !author) {
+            return res.status(400).json({ error: 'Title and author are required' });
+        }
+
+        // Upload image to Supabase Storage
+        let imageUrl = null;
+        if (imageFile) {
+            try {
+                console.log('Uploading image to Supabase Storage...');
+                // Ensure bucket exists before uploading
+                const bucketExists = await ensureBucketExists();
+                if (!bucketExists) {
+                    return res.status(500).json({ error: 'Storage system is not properly configured' });
+                }
+
+                const fileExt = path.extname(imageFile.originalname);
+                const fileName = `book-${Date.now()}-${Math.round(Math.random() * 1E9)}${fileExt}`;
+                
+                const { data: uploadData, error: uploadError } = await supabase
+                    .storage
+                    .from('book-images')
+                    .upload(fileName, imageFile.buffer, {
+                        contentType: imageFile.mimetype,
+                        cacheControl: '3600',
+                        upsert: false
+                    });
+
+                if (uploadError) {
+                    console.error('Error uploading image:', uploadError);
+                    return res.status(500).json({ 
+                        error: 'Failed to upload image',
+                        details: uploadError.message 
+                    });
+                }
+
+                // Get public URL for the uploaded image
+                const { data } = supabase
+                    .storage
+                    .from('book-images')
+                    .getPublicUrl(fileName);
+
+                imageUrl = data.publicUrl;
+                console.log('Image URL generated:', imageUrl);
+            } catch (error) {
+                console.error('Error uploading image:', error);
+                return res.status(500).json({ error: 'Failed to upload image' });
+            }
+        }
+
+        // Insert book into Supabase
+        try {
+            console.log('Inserting book into database...');
+            const { data: book, error } = await supabase
+                .from('books')
+                .insert({
+                    title,
+                    author,
+                    genre,
+                    summary,
+                    image_url: imageUrl,
+                    status: 'pending',
+                    user_id: req.user.id
+                })
+                .select()
+                .single();
+
+            if (error) {
+                console.error('Supabase insert error:', error);
+                throw error;
+            }
+
+            console.log('Book inserted successfully:', book);
+            res.status(201).json({ message: 'Book added successfully', book });
+        } catch (error) {
+            console.error('Error inserting book:', error);
+            res.status(500).json({ error: 'Failed to add book' });
+        }
+    } catch (error) {
+        console.error('Server error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 // Update book status (admin only)
 app.patch('/api/books/:id/status', authenticateToken, requireAdmin, async (req, res) => {
     try {
@@ -489,6 +565,37 @@ app.patch('/api/books/:id/status', authenticateToken, requireAdmin, async (req, 
     }
 });
 
+// Page routes
+app.get('/', (req, res) => {
+    res.sendFile(path.join(pagesDir, 'index.html'));
+});
+
+const pages = ['donate', 'about', 'books', 'contact', 'dashboard', 'login', 'signup'];
+pages.forEach(page => {
+    app.get(`/${page}`, (req, res) => {
+        res.sendFile(path.join(pagesDir, `${page}.html`));
+    });
+});
+
+// Admin routes
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(adminDir, 'pages', 'index.html'));
+});
+
+app.get('/admin/:page', (req, res) => {
+    const adminPage = req.params.page;
+    res.sendFile(path.join(adminDir, 'pages', `${adminPage}.html`));
+});
+
+// Catch-all route for 404
+app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.path.startsWith('/api')) {
+        res.status(404).sendFile(path.join(pagesDir, '404.html'));
+    } else {
+        next();
+    }
+});
+
 // Error handling middleware
 app.use((error, req, res, next) => {
     if (error instanceof multer.MulterError) {
@@ -497,10 +604,8 @@ app.use((error, req, res, next) => {
         }     }
     }    );
 
-
 // Start server
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
-
 });
 
