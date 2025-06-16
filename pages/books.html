@@ -3,127 +3,500 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Collection - The Booktown Foundation</title>
+    <title>Pending Books - The Booktown Foundation</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../styles/style.css">
-    <link rel="stylesheet" href="../styles/books.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .page-header {
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('../images/banner-bg.jpg');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .filter-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 1rem;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            font-weight: 500;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .styled-select {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .books-section {
+            padding: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .view-options {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .view-option {
+            background: none;
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .view-option.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .books-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .book-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .book-cover {
+            position: relative;
+            height: 300px;
+            overflow: hidden;
+        }
+
+        .book-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .book-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .book-card:hover .book-overlay {
+            opacity: 1;
+        }
+
+        .view-details-btn {
+            background: white;
+            color: var(--primary-color);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .book-details {
+            padding: 1.5rem;
+        }
+
+        .book-details h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        .book-details .author {
+            color: #666;
+            margin: 0.5rem 0;
+        }
+
+        .meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 1rem;
+        }
+
+        .meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .meta span.status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .meta span.status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .meta span.status.approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .meta span.status.rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .request-btn {
+            width: 100%;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: background 0.3s ease;
+        }
+
+        .request-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .no-books {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .reset-filters-btn {
+            background: none;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 1rem auto;
+        }
+
+        @media (max-width: 768px) {
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .books-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Toast Messages */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            background: white;
+            color: #333;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transform: translateY(100%);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1100;
+            max-width: 90%;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .toast.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .toast.info {
+            background: #cce5ff;
+            color: #004085;
+            border-left: 4px solid #0d6efd;
+        }
+
+        .toast i {
+            font-size: 1.25rem;
+        }
+
+        @media (max-width: 480px) {
+            .toast {
+                bottom: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: calc(100% - 20px);
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- Navbar component will be loaded here -->
     <div id="navbar-container"></div>
 
     <main>
         <section class="page-header">
             <div class="container">
-                <h1>Discover Your Next Read</h1>
-                <p>Browse through thousands of donated books waiting for new homes</p>
+                <h1>Pending Books</h1>
+                <p>Browse through books waiting for approval</p>
             </div>
         </section>
 
-        <section class="book-filters">
-            <div class="container">
-                <div class="filter-card">
-                    <div class="search-box with-icon">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="search-input" placeholder="Search by title, author or ISBN...">
+        <div class="container">
+            <div class="filter-card">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-input" placeholder="Search by title or author...">
+                </div>
+                
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label><i class="fas fa-book-open"></i> Genre</label>
+                        <select class="styled-select" id="genre-filter">
+                            <option value="all">All Genres</option>
+                            <option value="fiction">Fiction</option>
+                            <option value="non-fiction">Non-Fiction</option>
+                            <option value="academic">Academic</option>
+                            <option value="mystery">Mystery</option>
+                            <option value="biography">Biography</option>
+                        </select>
                     </div>
                     
-                    <div class="filter-grid">
-                        <div class="filter-group">
-                            <label><i class="fas fa-book-open"></i> Genre</label>
-                            <select class="styled-select" id="genre-filter">
-                                <option value="all">All Genres</option>
-                                <option value="fiction">Fiction</option>
-                                <option value="non-fiction">Non-Fiction</option>
-                                <option value="non-fiction">Academics</option>
-
-                                
-                            </select>
-                        </div>
-                        
-                        <div class="filter-group">
-                            <label><i class="fas fa-language"></i> Language</label>
-                            <select class="styled-select" id="language-filter">
-                                <option value="all">All Languages</option>
-                                <option value="english">English</option>
-                                <option value="hindi">Hindi</option>
-                                <option value="tamil">Tamil</option>
-                                <option value="telugu">Telugu</option>
-                                <option value="bengali">Bengali</option>
-                                <option value="marathi">Marathi</option>
-                            </select>
-                        </div>
-                        
-                        <div class="filter-group">
-                            <label><i class="fas fa-star"></i> Condition</label>
-                            <select class="styled-select" id="condition-filter">
-                                <option value="all">Any Condition</option>
-                                <option value="like-new">Like New</option>
-                                <option value="good">Good</option>
-                                <option value="fair">Fair</option>
-                            </select>
-                        </div>
-                        
-                        <button class="filter-btn" id="apply-filters">
-                            <i class="fas fa-filter"></i> Apply Filters
-                        </button>
+                    <div class="filter-group">
+                        <label><i class="fas fa-language"></i> Language</label>
+                        <select class="styled-select" id="language-filter">
+                            <option value="all">All Languages</option>
+                            <option value="english">English</option>
+                            <option value="hindi">Hindi</option>
+                            <option value="malayalam">Malayalam</option>
+                        </select>
                     </div>
+                    
+                    <div class="filter-group">
+                        <label><i class="fas fa-star"></i> Condition</label>
+                        <select class="styled-select" id="condition-filter">
+                            <option value="all">Any Condition</option>
+                            <option value="like-new">Like New</option>
+                            <option value="good">Good</option>
+                            <option value="fair">Fair</option>
+                        </select>
+                    </div>
+                    
+                    <button class="filter-btn" id="apply-filters">
+                        <i class="fas fa-filter"></i> Apply Filters
+                    </button>
                 </div>
             </div>
-        </section>
 
-        <section class="featured-books">
-            <div class="container">
+            <div class="books-section">
                 <div class="section-header">
-                    <h2>Donated Books Collection</h2>
+                    <h2>Available Books</h2>
                     <div class="view-options">
-                        <button class="view-option active" id="grid-view"><i class="fas fa-th"></i></button>
-                        <button class="view-option" id="list-view"><i class="fas fa-list"></i></button>
+                        <button class="view-option active" id="grid-view" title="Grid View">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button class="view-option" id="list-view" title="List View">
+                            <i class="fas fa-list"></i>
+                        </button>
                     </div>
                 </div>
                 
                 <div class="books-grid" id="books-container">
                     <!-- Books will be loaded here by JavaScript -->
                 </div>
-                
-                <div class="pagination">
-                    <button class="pagination-btn"><i class="fas fa-chevron-left"></i></button>
-                    <button class="pagination-btn"><i class="fas fa-chevron-right"></i></button>
-                </div>
             </div>
-        </section>
+        </div>
     </main>
 
-    <!-- Book Summary Modal -->
+    <!-- Book Details Modal -->
     <div id="book-modal" class="modal">
         <div class="modal-content">
-            <span class="close-modal">&times;</span>
+            <button class="close-modal">&times;</button>
             <div class="modal-body">
                 <div class="modal-book-info">
-                    <div class="modal-book-cover" id="modal-book-cover"></div>
+                    <div id="modal-book-cover"></div>
                     <div class="modal-book-details">
                         <h2 id="modal-book-title"></h2>
-                        <p class="modal-book-author" id="modal-book-author"></p>
+                        <p id="modal-book-author"></p>
                         <div class="modal-book-meta">
                             <span id="modal-book-genre"><i class="fas fa-book-open"></i> <span></span></span>
                             <span id="modal-book-language"><i class="fas fa-language"></i> <span></span></span>
                             <span id="modal-book-condition"><i class="fas fa-star"></i> <span></span></span>
                         </div>
-                    </div>
-                </div>
-                <div class="modal-book-summary">
-                    <h3>Book Summary</h3>
-                    <div id="modal-book-summary-content">
-                        <div class="loading-spinner">
-                            <i class="fas fa-spinner fa-spin"></i> Generating summary...
+                        <div class="modal-book-summary">
+                            <h3>Book Summary</h3>
+                            <p id="modal-book-summary-content"></p>
                         </div>
+                        <button class="request-btn" id="modal-request-btn">
+                            <i class="fas fa-hand-holding-heart"></i> Request Book
+                        </button>
                     </div>
-                </div>
-                <div class="modal-actions">
-                    <button class="request-btn" id="modal-request-btn">
-                        <i class="fas fa-hand-holding-heart"></i> Request Book
-                    </button>
                 </div>
             </div>
         </div>
@@ -131,10 +504,8 @@
 
     <div id="footer-container"></div>
 
-    <!-- Scripts -->
     <script src="../scripts/components.js"></script>
-    <script src="../scripts/utils.js"></script>
     <script src="../scripts/auth.js"></script>
-    <script src="../scripts/script.js"></script>
+    <script src="../scripts/books.js"></script>
 </body>
 </html>

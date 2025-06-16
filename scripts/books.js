@@ -1,250 +1,248 @@
-// Sample book data
-const books = [
-    {
-        id: 1,
-        title: "NCERT Science textbook for Class 9",
-        author: "NCERT",
-        cover: "book_images/science.png",
-        genre: "Academic",
-        language: "English",
-        condition: "Good",
-    },
-    {
-        id: 2,
-        title: "NCERT Mathematics textbook for Class 10",
-        author: "NCERT",
-        cover: "book_images/maths.png",
-        genre: "Academic",
-        language: "English",
-        condition: "Like New",
-    },
-    {
-        id: 3,
-        title: "NCERT English textbook for Class 10",
-        author: "NCERT",
-        cover: "book_images/english.png",
-        genre: "Academic",
-        language: "English",
-        condition: "Like New",
-    },
-    {
-        id: 4,
-        title: "Space Encyclopedia - A Comprehensive Guide",
-        author: "space_magazine",
-        cover: "book_images/space.png",
-        genre: "Academic",
-        language: "English",
-        condition: "Fair",
-    }
-    
-];
+// Function to fetch pending books
+async function fetchPendingBooks() {
+    try {
+        const response = await fetch('http://localhost:3001/api/books/pending', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
 
-// DOM Elements
-const booksContainer = document.getElementById('books-container');
-const modal = document.getElementById('book-modal');
-const closeModal = document.querySelector('.close-modal');
-const modalBookCover = document.getElementById('modal-book-cover');
-const modalBookTitle = document.getElementById('modal-book-title');
-const modalBookAuthor = document.getElementById('modal-book-author');
-const modalBookGenre = document.getElementById('modal-book-genre').querySelector('span');
-const modalBookLanguage = document.getElementById('modal-book-language').querySelector('span');
-const modalBookCondition = document.getElementById('modal-book-condition').querySelector('span');
-const modalBookSummary = document.getElementById('modal-book-summary-content');
-const gridViewBtn = document.getElementById('grid-view');
-const listViewBtn = document.getElementById('list-view');
-const searchInput = document.getElementById('search-input');
-const genreFilter = document.getElementById('genre-filter');
-const languageFilter = document.getElementById('language-filter');
-const conditionFilter = document.getElementById('condition-filter');
-const applyFiltersBtn = document.getElementById('apply-filters');
+        if (!response.ok) {
+            throw new Error('Failed to fetch books');
+        }
 
-// Initialize the page
-document.addEventListener('DOMContentLoaded', () => {
-    displayBooks(books);
-    setupEventListeners();
-});
-
-// Display books in the container
-function displayBooks(booksToDisplay) {
-    booksContainer.innerHTML = '';
-    
-    if (booksContainer.classList.contains('books-list')) {
-        displayBooksAsList(booksToDisplay);
-    } else {
-        displayBooksAsGrid(booksToDisplay);
+        const data = await response.json();
+        return data.books;
+    } catch (error) {
+        console.error('Error fetching books:', error);
+        showToast('Error loading books', 'error');
+        return [];
     }
 }
 
-// Display books in grid view
-function displayBooksAsGrid(booksToDisplay) {
-    booksToDisplay.forEach(book => {
-        const bookCard = document.createElement('div');
-        bookCard.className = 'book-card';
-        bookCard.dataset.id = book.id;
-        
-        bookCard.innerHTML = `
-            <div class="book-cover" style="background-image: url('${book.cover || `https://via.placeholder.com/300x450?text=${encodeURIComponent(book.title)}`}');">
-                <span class="condition-badge ${book.condition.toLowerCase().replace(' ', '-')}">${book.condition}</span>
+// Function to create a book card
+function createBookCard(book) {
+    const card = document.createElement('div');
+    card.className = 'book-card';
+    card.innerHTML = `
+        <div class="book-cover">
+            <img src="${book.image_url || '../images/default-book.jpg'}" alt="${book.title} Cover">
+            <div class="book-overlay">
+                <button class="view-details-btn" onclick="openBookModal('${book.id}')">
+                    <i class="fas fa-info-circle"></i> View Details
+                </button>
+            </div>
             </div>
             <div class="book-details">
                 <h3>${book.title}</h3>
                 <p class="author">${book.author}</p>
                 <div class="meta">
-                    <span><i class="fas fa-book-open"></i> ${book.genre}</span>
-                    <span><i class="fas fa-language"></i> ${book.language}</span>
+                <span><i class="fas fa-bookmark"></i> ${book.genre}</span>
+                <span><i class="fas fa-calendar"></i> ${new Date(book.created_at).toLocaleDateString()}</span>
+                <span class="status ${book.status}"><i class="fas fa-clock"></i> ${book.status}</span>
                 </div>
-                <button class="request-btn">
+            <button class="request-btn" onclick="requestBook('${book.id}')">
                     <i class="fas fa-hand-holding-heart"></i> Request Book
                 </button>
             </div>
         `;
-        
-        booksContainer.appendChild(bookCard);
-    });
+    return card;
 }
 
-// Display books in list view
-function displayBooksAsList(booksToDisplay) {
-    booksToDisplay.forEach(book => {
-        const bookItem = document.createElement('div');
-        bookItem.className = 'book-list-item';
-        bookItem.dataset.id = book.id;
-        
-        bookItem.innerHTML = `
-            <div class="book-cover" style="background-image: url('${book.cover || `https://via.placeholder.com/300x450?text=${encodeURIComponent(book.title)}`}');">
-                <span class="condition-badge ${book.condition.toLowerCase().replace(' ', '-')}">${book.condition}</span>
-            </div>
-            <div class="book-details">
-                <h3>${book.title}</h3>
-                <p class="author">${book.author}</p>
-                <div class="meta">
-                    <span><i class="fas fa-book-open"></i> ${book.genre}</span>
-                    <span><i class="fas fa-language"></i> ${book.language}</span>
-                </div>
-                <button class="request-btn">
-                    <i class="fas fa-hand-holding-heart"></i> Request Book
-                </button>
-            </div>
-        `;
-        
-        booksContainer.appendChild(bookItem);
-    });
-}
+// Function to apply filters
+function applyFilters(books) {
+    const searchTerm = document.getElementById('search-input').value.toLowerCase();
+    const selectedGenre = document.getElementById('genre-filter').value;
+    const selectedLanguage = document.getElementById('language-filter').value;
+    const selectedCondition = document.getElementById('condition-filter').value;
 
-// Set up event listeners
-function setupEventListeners() {
-    // View toggle
-    gridViewBtn.addEventListener('click', () => {
-        listViewBtn.classList.remove('active');
-        gridViewBtn.classList.add('active');
-        booksContainer.classList.remove('books-list');
-        booksContainer.classList.add('books-grid');
-        displayBooks(filterBooks());
-    });
-    
-    listViewBtn.addEventListener('click', () => {
-        gridViewBtn.classList.remove('active');
-        listViewBtn.classList.add('active');
-        booksContainer.classList.remove('books-grid');
-        booksContainer.classList.add('books-list');
-        displayBooks(filterBooks());
-    });
-    
-    // Book card click
-    booksContainer.addEventListener('click', (e) => {
-        const bookCard = e.target.closest('.book-card, .book-list-item');
-        const requestBtn = e.target.closest('.request-btn');
-        
-        if (bookCard && !requestBtn) {
-            const bookId = parseInt(bookCard.dataset.id);
-            openBookModal(bookId);
-        }
-        
-        if (requestBtn) {
-            e.stopPropagation();
-            alert('Book request submitted! We will contact you soon.');
-        }
-    });
-    
-    // Close modal
-    closeModal.addEventListener('click', () => {
-        modal.style.display = 'none';
-    });
-    
-    window.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.style.display = 'none';
-        }
-    });
-    
-    // Modal request button
-    document.getElementById('modal-request-btn').addEventListener('click', () => {
-        alert('Book request submitted! We will contact you soon.');
-        modal.style.display = 'none';
-    });
-    
-    // Search and filters
-    searchInput.addEventListener('input', debounce(() => {
-        displayBooks(filterBooks());
-    }, 300));
-    
-    applyFiltersBtn.addEventListener('click', () => {
-        displayBooks(filterBooks());
-    });
-}
-
-// Open book modal
-function openBookModal(bookId) {
-    const book = books.find(b => b.id === bookId);
-    
-    if (!book) return;
-    
-    modalBookCover.style.backgroundImage = `url('${book.cover || `https://via.placeholder.com/300x450?text=${encodeURIComponent(book.title)}`}')`;
-    modalBookTitle.textContent = book.title;
-    modalBookAuthor.textContent = book.author;
-    modalBookGenre.textContent = book.genre;
-    modalBookLanguage.textContent = book.language;
-    modalBookCondition.textContent = book.condition;
-    
-    // Display summary if available, otherwise show a simple message
-    modalBookSummary.innerHTML = book.summary ? `<p>${book.summary}</p>` : '<p>No summary available for this book.</p>';
-    
-    modal.style.display = 'block';
-}
-
-// Filter books based on search and filter criteria
-function filterBooks() {
-    const searchTerm = searchInput.value.toLowerCase();
-    const genreValue = genreFilter.value;
-    const languageValue = languageFilter.value;
-    const conditionValue = conditionFilter.value;
-    
     return books.filter(book => {
-        // Search filter
-        const matchesSearch = 
-            book.title.toLowerCase().includes(searchTerm) || 
-            book.author.toLowerCase().includes(searchTerm);
-        
-        // Genre filter
-        const matchesGenre = genreValue === 'all' || book.genre.toLowerCase() === genreValue;
-        
-        // Language filter
-        const matchesLanguage = languageValue === 'all' || book.language.toLowerCase() === languageValue;
-        
-        // Condition filter
-        const matchesCondition = conditionValue === 'all' || book.condition.toLowerCase().replace(' ', '-') === conditionValue;
-        
+        const matchesSearch = book.title.toLowerCase().includes(searchTerm) ||
+                            book.author.toLowerCase().includes(searchTerm);
+        const matchesGenre = selectedGenre === 'all' || book.genre === selectedGenre;
+        const matchesLanguage = selectedLanguage === 'all' || book.language === selectedLanguage;
+        const matchesCondition = selectedCondition === 'all' || book.condition === selectedCondition;
+
         return matchesSearch && matchesGenre && matchesLanguage && matchesCondition;
     });
 }
 
-// Debounce function to limit how often a function can be called
-function debounce(func, delay) {
+// Function to display books
+async function displayBooks() {
+    const booksContainer = document.getElementById('books-container');
+    booksContainer.innerHTML = '<div class="loading">Loading books...</div>';
+
+    const books = await fetchPendingBooks();
+    
+    if (books.length === 0) {
+        booksContainer.innerHTML = `
+            <div class="no-books">
+                <i class="fas fa-books" style="font-size: 3rem; color: #ddd; margin-bottom: 1rem;"></i>
+                <p>No pending books available at the moment.</p>
+            </div>
+        `;
+        return;
+    }
+
+    const filteredBooks = applyFilters(books);
+    booksContainer.innerHTML = '';
+    
+    if (filteredBooks.length === 0) {
+        booksContainer.innerHTML = `
+            <div class="no-books">
+                <p>No books match your filters.</p>
+                <button class="reset-filters-btn" onclick="resetFilters()">
+                    <i class="fas fa-undo"></i> Reset Filters
+                </button>
+            </div>
+        `;
+        return;
+    }
+
+    filteredBooks.forEach(book => {
+        booksContainer.appendChild(createBookCard(book));
+    });
+}
+
+// Function to reset filters
+function resetFilters() {
+    document.getElementById('search-input').value = '';
+    document.getElementById('genre-filter').value = 'all';
+    document.getElementById('language-filter').value = 'all';
+    document.getElementById('condition-filter').value = 'all';
+    displayBooks();
+}
+
+// Function to open book modal
+async function openBookModal(bookId) {
+    try {
+        const response = await fetch(`http://localhost:3001/api/books/${bookId}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch book details');
+        }
+
+        const data = await response.json();
+        const book = data.book;
+
+        // Update modal content
+        document.getElementById('modal-book-cover').innerHTML = `
+            <img src="${book.image_url || '../images/default-book.jpg'}" alt="${book.title} Cover">
+        `;
+        document.getElementById('modal-book-title').textContent = book.title;
+        document.getElementById('modal-book-author').textContent = book.author;
+        document.getElementById('modal-book-genre').querySelector('span').textContent = book.genre;
+        document.getElementById('modal-book-language').querySelector('span').textContent = book.language || 'Not specified';
+        document.getElementById('modal-book-condition').querySelector('span').textContent = book.condition || 'Not specified';
+        document.getElementById('modal-book-summary-content').textContent = book.summary || 'No summary available.';
+
+        // Show modal
+        document.getElementById('book-modal').classList.add('active');
+    } catch (error) {
+        console.error('Error opening book modal:', error);
+        showToast('Error loading book details', 'error');
+    }
+}
+
+// Function to request a book
+async function requestBook(bookId) {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showToast('Please log in to request books', 'error');
+            setTimeout(() => {
+                window.location.href = '/pages/login.html?redirect=' + encodeURIComponent(window.location.pathname);
+            }, 2000);
+            return;
+        }
+
+        const response = await fetch(`http://localhost:3001/api/books/${bookId}/request`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to request book');
+        }
+
+        showToast('Book requested successfully! We will contact you soon.', 'success');
+        
+        // Close modal if open
+        const modal = document.getElementById('book-modal');
+        if (modal.classList.contains('active')) {
+            modal.classList.remove('active');
+        }
+        
+        // Refresh the books list
+        displayBooks();
+    } catch (error) {
+        console.error('Error requesting book:', error);
+        showToast(error.message || 'Error requesting book. Please try again later.', 'error');
+    }
+}
+
+// Function to show toast messages
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+        <span>${message}</span>
+    `;
+    document.body.appendChild(toast);
+
+    setTimeout(() => toast.classList.add('show'), 100);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', () => {
+    // Display initial books
+    displayBooks();
+
+    // Add event listeners
+    document.getElementById('apply-filters').addEventListener('click', displayBooks);
+    document.getElementById('search-input').addEventListener('input', debounce(displayBooks, 300));
+    
+    // View toggle
+    document.getElementById('grid-view').addEventListener('click', () => {
+        document.getElementById('books-container').className = 'books-grid';
+        document.querySelector('.view-option.active').classList.remove('active');
+        document.getElementById('grid-view').classList.add('active');
+    });
+    
+    document.getElementById('list-view').addEventListener('click', () => {
+        document.getElementById('books-container').className = 'books-list';
+        document.querySelector('.view-option.active').classList.remove('active');
+        document.getElementById('list-view').classList.add('active');
+    });
+
+    // Modal close button
+    document.querySelector('.close-modal').addEventListener('click', () => {
+        document.getElementById('book-modal').classList.remove('active');
+    });
+});
+
+// Debounce function for search input
+function debounce(func, wait) {
     let timeout;
-    return function() {
-        const context = this;
-        const args = arguments;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
         clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(context, args), delay);
+        timeout = setTimeout(later, wait);
     };
 }

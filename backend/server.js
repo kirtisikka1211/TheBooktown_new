@@ -424,6 +424,74 @@ app.get('/api/books', authenticateToken, requireAdmin, async (req, res) => {
     }
 });
 
+// Get pending books
+app.get('/api/books/pending', async (req, res) => {
+    try {
+        const { data: books, error } = await supabase
+            .from('books')
+            .select(`
+                id,
+                title,
+                author,
+                genre,
+                language,
+                condition,
+                image_url,
+                summary,
+                created_at,
+                status
+            `)
+            .eq('status', 'pending')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Error fetching pending books:', error);
+            return res.status(500).json({ error: 'Failed to fetch pending books' });
+        }
+
+        res.json({ books });
+    } catch (error) {
+        console.error('Server error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Get book by ID (must be after /api/books/pending)
+app.get('/api/books/:id', authenticateToken, async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log('Fetching book with ID:', id);
+        
+        const { data: book, error } = await supabase
+            .from('books')
+            .select(`
+                *,
+                users (
+                    username,
+                    email
+                )
+            `)
+            .eq('id', id)
+            .single();
+
+        if (error) {
+            console.error('Error fetching book:', error);
+            return res.status(500).json({ error: 'Failed to fetch book' });
+        }
+
+        if (!book) {
+            return res.status(404).json({ error: 'Book not found' });
+        }
+
+        console.log('Found book:', book);
+        res.json({ book });
+
+    } catch (error) {
+        console.error('Server error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 // Get user's books
 app.get('/api/my-books', authenticateToken, async (req, res) => {
     try {
@@ -561,6 +629,45 @@ app.patch('/api/books/:id/status', authenticateToken, requireAdmin, async (req, 
 
     } catch (error) {
         console.error('Update book status error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Update book details (admin only)
+app.patch('/api/books/:id', authenticateToken, requireAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, author, genre, summary } = req.body;
+
+        // Validate required fields
+        if (!title || !author || !genre) {
+            return res.status(400).json({ error: 'Title, author, and genre are required' });
+        }
+
+        const { data: updatedBook, error } = await supabase
+            .from('books')
+            .update({ 
+                title,
+                author,
+                genre,
+                summary
+            })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Error updating book:', error);
+            return res.status(500).json({ error: 'Failed to update book' });
+        }
+
+        res.json({
+            message: 'Book updated successfully',
+            book: updatedBook
+        });
+
+    } catch (error) {
+        console.error('Update book error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });

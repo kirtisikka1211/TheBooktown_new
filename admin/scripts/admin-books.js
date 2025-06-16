@@ -107,9 +107,12 @@ function showToast(message, type = 'info') {
 // Function to handle book editing
 async function editBook(bookId) {
     try {
+        console.log('Attempting to edit book with ID:', bookId);
+        
         const token = localStorage.getItem('token');
         if (!token) {
-            throw new Error('No authentication token found');
+            showToast('Please log in to edit books', 'error');
+            return;
         }
 
         const response = await fetch(`http://localhost:3001/api/books/${bookId}`, {
@@ -118,24 +121,62 @@ async function editBook(bookId) {
             }
         });
 
+        if (response.status === 404) {
+            showToast('Book not found. It may have been deleted.', 'error');
+            return;
+        }
+
         if (!response.ok) {
             throw new Error('Failed to fetch book details');
         }
 
         const data = await response.json();
+        console.log('Received book data:', data);
+
+        if (!data.book) {
+            throw new Error('Book data is missing from response');
+        }
+
         const book = data.book;
 
-        // Populate the edit form
-        document.getElementById('editBookId').value = book.id;
-        document.getElementById('editTitle').value = book.title;
-        document.getElementById('editGenre').value = book.genre || 'fiction';
+        // Get form elements
+        const editForm = document.getElementById('editBookForm');
+        const editIdInput = document.getElementById('editBookId');
+        const editTitleInput = document.getElementById('editTitle');
+        const editAuthorInput = document.getElementById('editAuthor');
+        const editGenreSelect = document.getElementById('editGenre');
+        const editSummaryInput = document.getElementById('editSummary');
+        const editBookImage = document.getElementById('editBookImage');
+
+        // Check if form elements exist
+        if (!editForm || !editIdInput || !editTitleInput || !editAuthorInput || !editGenreSelect || !editSummaryInput) {
+            showToast('Error: Edit form elements not found', 'error');
+            return;
+        }
+
+        // Populate form fields
+        editIdInput.value = book.id;
+        editTitleInput.value = book.title || '';
+        editAuthorInput.value = book.author || '';
+        editGenreSelect.value = book.genre || 'fiction';
+        editSummaryInput.value = book.summary || '';
+        
+        // Update image preview if available
+        if (editBookImage) {
+            editBookImage.src = book.image_url || '../../images/default-book.jpg';
+        }
 
         // Show the modal
         const modal = document.getElementById('editBookModal');
+        if (!modal) {
+            showToast('Error: Modal not found', 'error');
+            return;
+        }
         modal.classList.add('active');
+
     } catch (error) {
-        console.error('Error fetching book details:', error);
-        showToast('Error fetching book details: ' + error.message, 'error');
+        console.error('Detailed error in editBook:', error);
+        showToast(`Error: ${error.message}. Please try again.`, 'error');
     }
 }
 
@@ -205,12 +246,19 @@ async function handleEditSubmit(event) {
     
     const bookId = document.getElementById('editBookId').value;
     const title = document.getElementById('editTitle').value;
+    const author = document.getElementById('editAuthor').value;
     const genre = document.getElementById('editGenre').value;
+    const summary = document.getElementById('editSummary').value;
 
     try {
         const token = localStorage.getItem('token');
         if (!token) {
             throw new Error('No authentication token found');
+        }
+
+        // Validate required fields
+        if (!title || !author || !genre) {
+            throw new Error('Title, author, and genre are required');
         }
 
         const response = await fetch(`http://localhost:3001/api/books/${bookId}`, {
@@ -219,11 +267,12 @@ async function handleEditSubmit(event) {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ title, genre })
+            body: JSON.stringify({ title, author, genre, summary })
         });
 
         if (!response.ok) {
-            throw new Error('Failed to update book');
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to update book');
         }
 
         showToast('Book updated successfully!', 'success');
