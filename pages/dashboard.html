@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard - The Booktown Foundation</title>
+    <link rel="stylesheet" href="../styles/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div id="navbar-container"></div>
+
+    <main>
+        <section class="page-header">
+            <div class="container">
+                <h1>Dashboard</h1>
+                <p>Welcome Back to your personalized dashboard</p>
+            </div>
+        </section>
+        <div class="container">
+            <div class="sidebar">
+                <div class="user-profile">
+                    <img src="../images/user-avatar.jpg" alt="User Avatar" class="avatar">
+                    <h3>John Doe</h3>
+                    <p>Member since: Jan 2023</p>
+                </div>
+                <nav class="dashboard-nav">
+                    <ul>
+                        <li><a href="#donations" class="active"><i class="fas fa-book"></i> My Donations</a></li>
+                        <li><a href="#requests"><i class="fas fa-hand-holding-heart"></i> My Requests</a></li>
+                        <li><a href="#history"><i class="fas fa-history"></i> Donation History</a></li>
+                        <li><a href="#settings"><i class="fas fa-cog"></i> Account Settings</a></li>
+                    </ul>
+                </nav>
+            </div>
+            
+            <div class="main-content">
+                <section id="donations" class="dashboard-section active">
+                    <div class="section-header">
+                        <h2><i class="fas fa-book"></i> My Donations</h2>
+                        <button class="btn btn-primary"><i class="fas fa-plus"></i> New Donation</button>
+                    </div>
+                    <div class="stats-cards">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>Total Donated</h3>
+                                <p class="number">42</p>
+                                <span class="trend positive">+12% this month</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-list"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>Currently Listed</h3>
+                                <p class="number">15</p>
+                                <span class="trend positive">+5% this month</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-gift"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3>Books Given Away</h3>
+                                <p class="number">27</p>
+                                <span class="trend positive">+8% this month</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="donated-books">
+                        <h3>Recently Donated</h3>
+                        <div class="books-grid">
+                            <!-- Sample book cards -->
+                            <div class="book-card">
+                                <div class="book-cover">
+                                    <img src="../images/book1.jpg" alt="Book Cover">
+                                    <span class="condition-badge good">Good</span>
+                                </div>
+                                <div class="book-details">
+                                    <h3>The Great Gatsby</h3>
+                                    <p class="author">F. Scott Fitzgerald</p>
+                                    <div class="meta">
+                                        <span><i class="fas fa-calendar"></i> Listed: Jan 15, 2024</span>
+                                        <span><i class="fas fa-eye"></i> 245 views</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- More book cards will be loaded via JavaScript -->
+                        </div>
+                    </div>
+                </section>
+                
+                <section id="requests" class="dashboard-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-hand-holding-heart"></i> My Requests</h2>
+                        <button class="btn btn-primary"><i class="fas fa-plus"></i> New Request</button>
+                    </div>
+                    
+                    <div class="requests-list">
+                        <div class="request-item">
+                            <div class="request-info">
+                                <h3>To Kill a Mockingbird</h3>
+                                <p class="author">Harper Lee</p>
+                                <div class="meta">
+                                    <span><i class="fas fa-calendar"></i> Requested: Jan 20, 2024</span>
+                                    <span><i class="fas fa-clock"></i> Status: Pending</span>
+                                </div>
+                            </div>
+                            <div class="request-actions">
+                                <button class="btn btn-outline">Cancel Request</button>
+                            </div>
+                        </div>
+                        <!-- More request items will be loaded via JavaScript -->
+                    </div>
+                </section>
+                
+                <section id="history" class="dashboard-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-history"></i> Donation History</h2>
+                        <button class="btn btn-outline"><i class="fas fa-download"></i> Export</button>
+                    </div>
+                    <div class="history-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Book Title</th>
+                                    <th>Status</th>
+                                    <th>Recipient</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Jan 15, 2024</td>
+                                    <td>The Great Gatsby</td>
+                                    <td><span class="status-badge completed">Completed</span></td>
+                                    <td>Sarah Johnson</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline">View Details</button>
+                                    </td>
+                                </tr>
+                                <!-- More history items will be loaded via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section id="settings" class="dashboard-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-cog"></i> Account Settings</h2>
+                    </div>
+                    
+                    <div class="settings-grid">
+                        <div class="settings-card">
+                            <h3>Profile Information</h3>
+                            <form class="settings-form">
+                                <div class="form-group">
+                                    <label>Full Name</label>
+                                    <input type="text" value="John Doe">
+                                </div>
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="email" value="john.doe@example.com">
+                                </div>
+                                <div class="form-group">
+                                    <label>Phone</label>
+                                    <input type="tel" value="+1 234 567 8900">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </form>
+                        </div>
+
+                        <div class="settings-card">
+                            <h3>Notification Preferences</h3>
+                            <div class="settings-options">
+                                <div class="option-item">
+                                    <label class="switch">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                    <span>Email Notifications</span>
+                                </div>
+                                <div class="option-item">
+                                    <label class="switch">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                    <span>Request Updates</span>
+                                </div>
+                                <div class="option-item">
+                                    <label class="switch">
+                                        <input type="checkbox">
+                                        <span class="slider"></span>
+                                    </label>
+                                    <span>Newsletter</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="../scripts/components.js"></script>
+    <script src="../scripts/auth.js"></script>
+    <script src="../scripts/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Portal</title>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../styles/admin.css">
+  <link rel="stylesheet" href="../../styles/style.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      min-height: 100vh;
+    }
+  
+    .admin-sidebar {
+      width: 250px;
+      background-color: #2c3e50;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s ease;
+    }
+  
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid #34495e;
+    }
+  
+    .sidebar-header img {
+      width: 40px;
+      margin-right: 10px;
+    }
+  
+    .sidebar-nav {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+  
+    .nav-item {
+      padding: 12px 20px;
+      text-decoration: none;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+  
+    .nav-item i {
+      margin-right: 10px;
+    }
+  
+    .nav-item:hover,
+    .nav-item.active {
+      background-color: #34495e;
+    }
+  
+    .badge {
+      background-color: #e74c3c;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+  
+    .sidebar-footer {
+      padding: 16px;
+      border-top: 1px solid #34495e;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+  
+    .admin-profile {
+      display: flex;
+      align-items: center;
+    }
+  
+    .admin-profile img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+  
+    .logout-btn {
+      color: #ecf0f1;
+      text-decoration: none;
+      font-size: 18px;
+    }
+  
+    .menu-toggle {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background: #2c3e50;
+      color: white;
+      border: none;
+      padding: 10px;
+      font-size: 20px;
+      display: none;
+      z-index: 999;
+      cursor: pointer;
+    }
+  
+    .main-content {
+      flex: 1;
+      padding: 20px;
+      margin-left: 250px; /* For desktop */
+      transition: margin-left 0.3s ease;
+    }
+  
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+  
+      .admin-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        transform: translateX(-100%);
+        z-index: 998;
+        width: 250px;
+      }
+  
+      .admin-sidebar.open {
+        transform: translateX(0);
+      }
+  
+      .menu-toggle {
+        display: block;
+      }
+  
+      .main-content {
+        margin-left: 0;
+      }
+    }
+  </style>
+  
+</head>
+<body>
+
+  <button class="menu-toggle" onclick="toggleSidebar()">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="sidebar-header">
+      <img src="../images/logo.png" alt="Booktown Logo" class="admin-logo">
+      <h2>Admin Portal</h2>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="index.html" class="nav-item">
+        <i class="fas fa-tachometer-alt"></i><span>Dashboard</span>
+      </a>
+      <a href="moderation.html" class="nav-item">
+        <i class="fas fa-shield-alt"></i><span>Moderation</span><span class="badge">12</span>
+      </a>
+      <a href="users.html" class="nav-item">
+        <i class="fas fa-users"></i><span>Users</span>
+      </a>
+      <a href="books.html" class="nav-item">
+        <i class="fas fa-book"></i><span>Books</span>
+      </a>
+      <a href="analytics.html" class="nav-item active">
+        <i class="fas fa-chart-line"></i><span>Analytics</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="admin-profile">
+        <img src="../images/admin-avatar.jpg" alt="Admin Avatar">
+        <div class="admin-info">
+          <strong>Admin User</strong><small>Super Admin</small>
+        </div>
+      </div>
+      <a href="../login.html" class="logout-btn">
+        <i class="fas fa-sign-out-alt"></i>
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <h1>Welcome to the Admin Dashboard</h1>
+  </main>
+
+  <script>
+    function toggleSidebar() {
+      document.getElementById("adminSidebar").classList.toggle("open");
+    }
+  </script>
+
+</body>
+</html>

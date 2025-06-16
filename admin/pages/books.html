@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Management - Admin Portal</title>
+    <link rel="stylesheet" href="../styles/admin.css">
+    <link rel="stylesheet" href="../../styles/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="admin-dashboard">
+    <div class="admin-container">
+         <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <img src="../../images/logo.png" alt="Booktown Logo" class="admin-logo">
+                <h2>Admin Portal</h2>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="index.html" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="moderation.html" class="nav-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Moderation</span>
+                    <span class="badge" id="pending-count">0</span>
+                </a>
+                <a href="users.html" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>Users</span>
+                </a>
+                <a href="books.html" class="nav-item active">
+                    <i class="fas fa-book"></i>
+                    <span>Books</span>
+                </a>
+                <a href="analytics.html" class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="admin-profile">
+                    <img src="../../images/admin-avatar.jpg" alt="Admin Avatar">
+                    <div class="admin-info">
+                        <strong>Admin User</strong>
+                        <small>Super Admin</small>
+                    </div>
+                </div>
+                <a href="../../pages/login.html" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </aside> 
+        
+        <main class="admin-main">
+            <div class="admin-content">
+                <div class="welcome-banner" style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('../image-4@2x.png') center/cover;">
+                    <h1><i class="fas fa-book"></i> Book Management</h1>
+                    <p>Manage all books in the system</p>
+                </div>
+                
+                <div class="books-stats-cards">
+                    <div class="stat-card">
+                        <div class="icon" style="background-color: #4a7fdb;">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <div class="info">
+                            <h3>0</h3>
+                            <p>Total Books</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="icon" style="background-color: #6bbd68;">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="info">
+                            <h3>0</h3>
+                            <p>Available</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="icon" style="background-color: #ff9a56;">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <div class="info">
+                            <h3>0</h3>
+                            <p>Pending</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="books-view-options">
+                    <div class="view-toggle">
+                        <button class="btn btn-icon active" title="Grid View">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button class="btn btn-icon" title="List View">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                    <div class="view-filters">
+                        <select class="filter-select" id="genre-filter">
+                            <option value="all">All Categories</option>
+                            <option value="fiction">Fiction</option>
+                            <option value="non-fiction">Non-Fiction</option>
+                            <option value="academic">Academic</option>
+                        </select>
+                        <select class="filter-select" id="status-filter">
+                            <option value="all">All Statuses</option>
+                            <option value="approved">Approved</option>
+                            <option value="pending">Pending</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="books-grid">
+                    <!-- Books will be dynamically loaded here -->
+                        </div>
+                            </div>
+        </main>
+                            </div>
+
+    <!-- Edit Book Modal -->
+    <div class="modal" id="editBookModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Book</h2>
+                <button class="close-btn" onclick="closeModal('editBookModal')">&times;</button>
+                        </div>
+            <div class="modal-body">
+                <form id="editBookForm">
+                    <input type="hidden" id="editBookId">
+                    <div class="form-group">
+                        <label for="editTitle">Book Title</label>
+                        <input type="text" id="editTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editGenre">Genre</label>
+                        <select id="editGenre" required>
+                            <option value="fiction">Fiction</option>
+                            <option value="non-fiction">Non-Fiction</option>
+                            <option value="academic">Academic</option>
+                        </select>
+                        </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <button type="button" class="btn btn-outline" onclick="closeModal('editBookModal')">Cancel</button>
+                            </div>
+                </form>
+                            </div>
+                        </div>
+                    </div>
+
+    <!-- Book Details Modal -->
+    <div class="modal" id="bookDetailsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Book Details</h2>
+                <button class="close-btn" onclick="closeModal('bookDetailsModal')">&times;</button>
+                        </div>
+            <div class="modal-body">
+                <div class="book-details-content">
+                    <div class="book-image">
+                        <img id="detailBookImage" src="" alt="Book Cover">
+                            </div>
+                    <div class="book-info">
+                        <h3 id="detailTitle"></h3>
+                        <p class="author" id="detailAuthor"></p>
+                        <div class="detail-meta">
+                            <p><strong>Genre:</strong> <span id="detailGenre"></span></p>
+                            <p><strong>Status:</strong> <span id="detailStatus"></span></p>
+                            <p><strong>Submitted by:</strong> <span id="detailUser"></span></p>
+                            <p><strong>Submitted on:</strong> <span id="detailDate"></span></p>
+                            </div>
+                        <div class="detail-summary">
+                            <h4>Summary</h4>
+                            <p id="detailSummary"></p>
+                        </div>
+                        </div>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+
+    <script src="../scripts/admin-books.js"></script>
+</body>
+</html>
