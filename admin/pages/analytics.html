@@ -9,137 +9,316 @@
     <link rel="stylesheet" href="../../styles/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        :root {
+            --transition-speed: 0.3s;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --hover-transform: translateY(-3px);
+        }
+
         .stats-cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
             margin-bottom: 2rem;
-            padding: 1rem;
+            padding: 1.5rem;
         }
 
         .stat-card {
-            background: #1a2634;
-            border-radius: 10px;
+            background: linear-gradient(135deg, #1a2634 0%, #2c3e50 100%);
+            border-radius: 12px;
             padding: 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--card-shadow);
             color: white;
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 1.5rem;
+            transition: all var(--transition-speed) ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+            opacity: 0;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .stat-card:hover {
+            transform: var(--hover-transform);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
         }
 
         .stat-card i {
-            font-size: 2rem;
+            font-size: 2.2rem;
             color: #fff;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 1rem;
-            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 1.2rem;
+            border-radius: 12px;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .stat-card:hover i {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .stat-card .stat-content {
             display: flex;
             flex-direction: column;
+            gap: 0.5rem;
         }
 
         .stat-card h3 {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             margin: 0;
             font-weight: 600;
             color: #fff;
+            line-height: 1;
         }
 
         .stat-card p {
             margin: 0;
-            font-size: 1rem;
-            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
         }
 
         .requests-table {
             background: var(--card-bg);
-            border-radius: 10px;
+            border-radius: 12px;
             box-shadow: var(--card-shadow);
             overflow: hidden;
-            margin-top: 2rem;
+            margin: 1.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.08);
         }
 
         .table-header {
-            background: var(--header-bg);
-            padding: 1rem;
-            border-bottom: 1px solid var(--border-color);
+            background: #fff;
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .book-image {
-            width: 50px;
-            height: 70px;
-            object-fit: cover;
-            border-radius: 4px;
+        .search-input {
+            padding: 0.8rem 1.2rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            font-size: 1rem;
+            width: 300px;
+            transition: all var(--transition-speed) ease;
+            background: #f8f9fa;
         }
 
-        .filters {
-            display: none;
-        }
-
-        .filter-btn {
-            padding: 0.5rem 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            background: transparent;
-            color: #666;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .filter-btn:hover {
-            background: rgba(0, 0, 0, 0.05);
-        }
-
-        .filter-btn.active {
-            background: var(--primary-color);
-            color: white;
+        .search-input:focus {
+            outline: none;
             border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(233, 119, 119, 0.1);
+            background: #fff;
+        }
+
+        .search-input::placeholder {
+            color: #adb5bd;
         }
 
         .export-btn {
-            background: #1a2634;
+            background: linear-gradient(135deg, #1a2634 0%, #2c3e50 100%);
             color: white;
             border: none;
             padding: 0.8rem 1.5rem;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all var(--transition-speed) ease;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.8rem;
             font-weight: 500;
+            font-size: 1rem;
         }
 
         .export-btn:hover {
-            background: #2c3e50;
-            transform: translateY(-1px);
+            transform: var(--hover-transform);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .export-btn i {
-            font-size: 1rem;
+            font-size: 1.1rem;
         }
 
         .table-responsive {
             overflow-x: auto;
+            padding: 0.5rem;
         }
 
-        .analytics-content {
+        .analytics-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .analytics-table th {
+            background: #f8f9fa;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #495057;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+            white-space: nowrap;
+        }
+
+        .analytics-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            color: #495057;
+        }
+
+        .analytics-table tbody tr {
+            transition: all var(--transition-speed) ease;
+        }
+
+        .analytics-table tbody tr:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .book-cell {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .book-image {
+            width: 60px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all var(--transition-speed) ease;
+        }
+
+        .book-cell:hover .book-image {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .book-cell div {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .book-cell strong {
+            color: #212529;
+            font-weight: 600;
+        }
+
+        .book-cell small {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .welcome-banner {
+            margin: 1.5rem;
+            padding: 2.5rem;
+            border-radius: 12px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+
+        .welcome-banner h1 {
+            margin: 0;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .welcome-banner p {
+            margin: 0.5rem 0 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .d-flex {
+            display: flex;
+            align-items: center;
+        }
+
+        .gap-3 {
+            gap: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .stats-cards {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+
+            .requests-table {
+                margin: 1rem;
+            }
+
+            .table-header {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .search-input {
+                width: 100%;
+            }
+
+            .export-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .welcome-banner {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+
+            .book-cell {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .book-image {
+                width: 50px;
+                height: 70px;
+            }
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
             padding: 2rem;
+            color: #6c757d;
+            font-size: 1rem;
         }
 
-        /* Remove status-related styles */
-        .status-pending,
-        .status-approved,
-        .status-rejected,
-        .status-badge,
-        .btn-action {
-            display: none;
+        /* No Results State */
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+            font-size: 1.1rem;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 8px;
+            margin: 2rem;
         }
     </style>
 </head>
@@ -248,6 +427,9 @@
         let allRequests = [];
 
         async function fetchRequests() {
+            const tbody = document.getElementById('requestsTableBody');
+            tbody.innerHTML = '<tr><td colspan="5"><div class="loading">Loading requests...</div></td></tr>';
+
             try {
                 const token = localStorage.getItem('token');
                 if (!token) {
@@ -272,12 +454,19 @@
                 filterAndDisplayRequests();
             } catch (error) {
                 console.error('Error:', error);
-                showToast(error.message || 'Failed to load requests', 'error');
+                tbody.innerHTML = `<tr><td colspan="5"><div class="no-results">Error: ${error.message || 'Failed to load requests'}</div></td></tr>`;
             }
         }
 
         function updateDashboard() {
-            document.getElementById('totalRequests').textContent = allRequests.length;
+            const totalElement = document.getElementById('totalRequests');
+            totalElement.textContent = allRequests.length;
+            
+            // Add animation effect
+            totalElement.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                totalElement.style.transform = 'scale(1)';
+            }, 200);
         }
 
         function filterAndDisplayRequests() {
@@ -293,8 +482,21 @@
             }
 
             const tbody = document.getElementById('requestsTableBody');
-            tbody.innerHTML = '';
+            
+            if (filteredRequests.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5">
+                            <div class="no-results">
+                                ${searchTerm ? 'No requests found matching your search.' : 'No requests available.'}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
 
+            tbody.innerHTML = '';
             filteredRequests.forEach(request => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -302,7 +504,8 @@
                         <div class="book-cell">
                             <img src="${request.books.image_url || '../../images/default-book.jpg'}" 
                                  alt="${request.books.title}" 
-                                 class="book-image">
+                                 class="book-image"
+                                 onerror="this.src='../../images/default-book.jpg'">
                             <div>
                                 <strong>${request.books.title}</strong>
                                 <small>${request.books.author}</small>
@@ -322,6 +525,11 @@
         }
 
         function exportToCSV() {
+            if (allRequests.length === 0) {
+                showToast('No data available to export', 'warning');
+                return;
+            }
+
             const csvRows = [
                 ['Book Title', 'Author', 'Requester Name', 'Email', 'Contact', 'Address', 'Date']
             ];
@@ -347,15 +555,41 @@
             link.href = URL.createObjectURL(blob);
             link.download = `book_requests_${new Date().toISOString().split('T')[0]}.csv`;
             link.click();
+            
+            showToast('Export completed successfully', 'success');
+        }
+
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => toast.classList.add('show'), 100);
+            
+            // Remove toast after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
 
         // Event Listeners
         document.addEventListener('DOMContentLoaded', () => {
             fetchRequests();
 
-            // Search input
-            document.getElementById('searchInput').addEventListener('input', () => {
-                filterAndDisplayRequests();
+            // Search input with debounce
+            let searchTimeout;
+            const searchInput = document.getElementById('searchInput');
+            
+            searchInput.addEventListener('input', () => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    filterAndDisplayRequests();
+                }, 300);
             });
 
             // Load admin info
@@ -364,8 +598,8 @@
             const token = localStorage.getItem('token');
             if (token) {
                 const payload = JSON.parse(atob(token.split('.')[1]));
-                adminEmail.textContent = payload.email;
-                adminName.textContent = payload.name || 'Admin';
+                if (adminEmail) adminEmail.textContent = payload.email;
+                if (adminName) adminName.textContent = payload.name || 'Admin';
             }
         });
     </script>

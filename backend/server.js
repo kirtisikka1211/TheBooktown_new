@@ -164,7 +164,7 @@ Promise.all([ensureBucketExists(), ensureBookRequestsTable()])
         } else {
             console.error('Failed to ensure all required resources exist');
         }
-    });
+});
 
 // API Routes
 // Get all users (admin only)

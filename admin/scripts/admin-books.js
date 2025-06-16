@@ -83,8 +83,24 @@ async function displayBooks() {
     const books = await fetchAllBooks();
     updateBookStats(books);
     
+    // Get filter values
+    const genreFilter = document.getElementById('genre-filter').value;
+    const statusFilter = document.getElementById('status-filter').value;
+    
+    // Apply filters
+    const filteredBooks = books.filter(book => {
+        const matchesGenre = genreFilter === 'all' || book.genre?.toLowerCase() === genreFilter.toLowerCase();
+        const matchesStatus = statusFilter === 'all' || book.status?.toLowerCase() === statusFilter.toLowerCase();
+        return matchesGenre && matchesStatus;
+    });
+    
     booksGrid.innerHTML = '';
-    books.forEach(book => {
+    if (filteredBooks.length === 0) {
+        booksGrid.innerHTML = '<div class="no-books">No books found matching the selected filters.</div>';
+        return;
+    }
+    
+    filteredBooks.forEach(book => {
         booksGrid.appendChild(createBookCard(book));
     });
 }
@@ -562,4 +578,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Add event listeners for filters
+    const genreFilter = document.getElementById('genre-filter');
+    const statusFilter = document.getElementById('status-filter');
+    
+    if (genreFilter) {
+        genreFilter.addEventListener('change', displayBooks);
+    }
+    
+    if (statusFilter) {
+        statusFilter.addEventListener('change', displayBooks);
+    }
+    
+    // Initial display
+    displayBooks();
 }); 
