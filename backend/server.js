@@ -12,29 +12,132 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// Initialize Express app
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+// Initialize Supabase client
+const supabase = createClient(
+    process.env.VITE_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
+// Set up directory paths
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-// Define root directory path - going up one level from backend
 const rootDir = path.join(__dirname, '..');
 const pagesDir = path.join(rootDir, 'pages');
 const adminDir = path.join(rootDir, 'admin');
 
-// Serve static files from various directories
+// Basic middleware
+app.use(express.json());
+app.use(cors());
+
+// Serve static files
 app.use('/css', express.static(path.join(rootDir, 'css')));
 app.use('/js', express.static(path.join(rootDir, 'js')));
 app.use('/images', express.static(path.join(rootDir, 'images')));
 app.use('/components', express.static(path.join(rootDir, 'components')));
 
-// Define routes for pages
-const pages = ['donate', 'about', 'books', 'contact', 'dashboard', 'login', 'signup'];
+// Create uploads directory
+if (!fs.existsSync('uploads')) {
+    fs.mkdirSync('uploads');
+}
 
-// Route for home page
+// Multer configuration
+const storage = multer.memoryStorage();
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only image files are allowed!'), false);
+        }
+    }
+});
+
+// Authentication middleware
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ error: 'Access token required' });
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (err) {
+            return res.status(403).json({ error: 'Invalid token' });
+        }
+        req.user = user;
+        next();
+    });
+};
+
+// Admin middleware
+const requireAdmin = (req, res, next) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+    }
+    next();
+};
+async function ensureBucketExists() {
+    try {
+        // Check if bucket exists
+        const { data: buckets, error: listError } = await supabase
+            .storage
+            .listBuckets();
+
+        if (listError) {
+            console.error('Error listing buckets:', listError);
+            return false;
+        }
+
+        // Check if book-images bucket exists
+        const bucketExists = buckets.some(bucket => bucket.name === 'book-images');
+
+        if (!bucketExists) {
+            // Create the bucket if it doesn't exist
+            const { data, error: createError } = await supabase
+                .storage
+                .createBucket('book-images', {
+                    public: true,
+                    fileSizeLimit: 5242880, // 5MB in bytes
+                    allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif']
+                });
+
+            if (createError) {
+                console.error('Error creating bucket:', createError);
+                return false;
+            }
+
+            console.log('Created book-images bucket successfully');
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Error in ensureBucketExists:', error);
+        return false;
+    }
+}
+
+// Call the function when the server starts
+ensureBucketExists().then(success => {
+    if (success) {
+        console.log('Storage bucket check completed successfully');
+    } else {
+        console.error('Failed to ensure storage bucket exists');
+    }
+});
+
+// Page routes
 app.get('/', (req, res) => {
     res.sendFile(path.join(pagesDir, 'index.html'));
 });
 
-// Routes for other pages
+const pages = ['donate', 'about', 'books', 'contact', 'dashboard', 'login', 'signup'];
 pages.forEach(page => {
     app.get(`/pages/${page}`, (req, res) => {
         res.sendFile(path.join(pagesDir, `${page}.html`));
@@ -386,38 +489,18 @@ app.patch('/api/books/:id/status', authenticateToken, requireAdmin, async (req, 
     }
 });
 
-// Get all users (admin only)
-app.get('/api/users', authenticateToken, requireAdmin, async (req, res) => {
-    try {
-        const { data: users, error } = await supabase
-            .from('users')
-            .select('id, username, email, role, created_at')
-            .order('created_at', { ascending: false });
-
-        if (error) {
-            return res.status(500).json({ error: 'Failed to fetch users' });
-        }
-
-        res.json({ users });
-
-    } catch (error) {
-        console.error('Fetch users error:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
-
 // Error handling middleware
 app.use((error, req, res, next) => {
     if (error instanceof multer.MulterError) {
         if (error.code === 'LIMIT_FILE_SIZE') {
             return res.status(400).json({ error: 'File too large. Maximum size is 5MB.' });
-        }
-    }
-    res.status(500).json({ error: error.message });
-});
+        }     }
+    }    );
+
 
 // Start server
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+
 });
 
