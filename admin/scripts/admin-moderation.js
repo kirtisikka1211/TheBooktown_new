@@ -6,7 +6,7 @@ async function fetchPendingBooks() {
             throw new Error('No authentication token found');
         }
 
-        const response = await fetch('http://localhost:3001/api/books?status=pending', {
+        const response = await fetch('https://thebooktown-new-1.onrender.com/api/books?status=pending', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -70,7 +70,7 @@ async function approveBook(bookId) {
             throw new Error('No authentication token found');
         }
 
-        const response = await fetch(`http://localhost:3001/api/books/${bookId}/status`, {
+        const response = await fetch(`https://thebooktown-new-1.onrender.com/api/books/${bookId}/status`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -102,7 +102,7 @@ async function rejectBook(bookId) {
             throw new Error('No authentication token found');
         }
 
-        const response = await fetch(`http://localhost:3001/api/books/${bookId}/status`, {
+        const response = await fetch(`https://thebooktown-new-1.onrender.com/api/books/${bookId}/status`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',

@@ -557,7 +557,7 @@
 
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`http://localhost:3001/api/books/${bookToDelete}`, {
+                const response = await fetch(`https://thebooktown-new-1.onrender.com/api/books/${bookToDelete}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`

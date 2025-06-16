@@ -1,7 +1,7 @@
 // Function to fetch books
 async function fetchBooks() {
     try {
-        const response = await fetch('http://localhost:3001/api/public/books');
+        const response = await fetch('https://thebooktown-new-1.onrender.com/api/public/books');
         
         if (!response.ok) {
             throw new Error('Failed to fetch books');
@@ -12,7 +12,7 @@ async function fetchBooks() {
         // If user is logged in, fetch their requests to mark requested books
         const token = localStorage.getItem('token');
         if (token) {
-            const requestsResponse = await fetch('http://localhost:3001/api/my-requests', {
+            const requestsResponse = await fetch('https://thebooktown-new-1.onrender.com/api/my-requests', {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -267,7 +267,7 @@ async function submitBookRequest(event) {
             return;
         }
 
-        const response = await fetch(`http://localhost:3001/api/books/${currentBookId}/request`, {
+        const response = await fetch(`https://thebooktown-new-1.onrender.com/api/books/${currentBookId}/request`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,

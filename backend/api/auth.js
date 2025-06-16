@@ -3,7 +3,7 @@ class AuthManager {
     constructor() {
         this.token = localStorage.getItem('authToken');
         this.user = JSON.parse(localStorage.getItem('user') || 'null');
-        this.baseURL = 'http://localhost:3001/api';
+        this.baseURL = 'https://thebooktown-new-1.onrender.com/api';
     }
 
     // Check if user is authenticated

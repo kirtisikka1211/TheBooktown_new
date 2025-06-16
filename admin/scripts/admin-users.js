@@ -6,7 +6,7 @@ async function fetchUsers() {
             throw new Error('No authentication token found');
         }
 
-        const response = await fetch('http://localhost:3001/api/users', {
+        const response = await fetch('https://thebooktown-new-1.onrender.com/api/users', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -123,7 +123,7 @@ async function viewUserDetails(userId) {
             throw new Error('No authentication token found');
         }
 
-        const response = await fetch(`http://localhost:3001/api/users/${userId}`, {
+        const response = await fetch(`https://thebooktown-new-1.onrender.com/api/users/${userId}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }

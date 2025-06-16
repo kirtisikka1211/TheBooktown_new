@@ -9,7 +9,7 @@ async function fetchAllBooks() {
             throw new Error('No authentication token found');
         }
 
-        const response = await fetch('http://localhost:3001/api/books', {
+        const response = await fetch('https://thebooktown-new-1.onrender.com/api/books', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -118,7 +118,7 @@ async function editBook(bookId) {
             return;
         }
 
-        const response = await fetch(`http://localhost:3001/api/books/${bookId}`, {
+        const response = await fetch(`https://thebooktown-new-1.onrender.com/api/books/${bookId}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -191,7 +191,7 @@ async function viewBookDetails(bookId) {
             throw new Error('No authentication token found');
         }
 
-        const response = await fetch(`http://localhost:3001/api/books/${bookId}`, {
+        const response = await fetch(`https://thebooktown-new-1.onrender.com/api/books/${bookId}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -264,7 +264,7 @@ async function handleEditSubmit(event) {
             throw new Error('Title, author, and genre are required');
         }
 
-        const response = await fetch(`http://localhost:3001/api/books/${bookId}`, {
+        const response = await fetch(`https://thebooktown-new-1.onrender.com/api/books/${bookId}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -329,7 +329,7 @@ async function handleAddBook(e) {
         }
 
         console.log('Sending request to add book...');
-        const response = await fetch('http://localhost:3001/api/admin/add-book', {
+        const response = await fetch('https://thebooktown-new-1.onrender.com/api/admin/add-book', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`
