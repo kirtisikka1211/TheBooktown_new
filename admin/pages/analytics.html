@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,7 +16,7 @@
             margin-bottom: 2rem;
             padding: 1rem;
         }
-        
+
         .stat-card {
             background: #1a2634;
             border-radius: 10px;
@@ -26,7 +27,7 @@
             align-items: center;
             gap: 1rem;
         }
-        
+
         .stat-card i {
             font-size: 2rem;
             color: #fff;
@@ -34,25 +35,25 @@
             padding: 1rem;
             border-radius: 50%;
         }
-        
+
         .stat-card .stat-content {
             display: flex;
             flex-direction: column;
         }
-        
+
         .stat-card h3 {
             font-size: 2.5rem;
             margin: 0;
             font-weight: 600;
             color: #fff;
         }
-        
+
         .stat-card p {
             margin: 0;
             font-size: 1rem;
             color: rgba(255, 255, 255, 0.7);
         }
-        
+
         .requests-table {
             background: var(--card-bg);
             border-radius: 10px;
@@ -60,7 +61,7 @@
             overflow: hidden;
             margin-top: 2rem;
         }
-        
+
         .table-header {
             background: var(--header-bg);
             padding: 1rem;
@@ -69,18 +70,18 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .book-image {
             width: 50px;
             height: 70px;
             object-fit: cover;
             border-radius: 4px;
         }
-        
+
         .filters {
             display: none;
         }
-        
+
         .filter-btn {
             padding: 0.5rem 1rem;
             border: 1px solid var(--border-color);
@@ -90,17 +91,17 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        
+
         .filter-btn:hover {
             background: rgba(0, 0, 0, 0.05);
         }
-        
+
         .filter-btn.active {
             background: var(--primary-color);
             color: white;
             border-color: var(--primary-color);
         }
-        
+
         .export-btn {
             background: #1a2634;
             color: white;
@@ -114,12 +115,12 @@
             gap: 0.5rem;
             font-weight: 500;
         }
-        
+
         .export-btn:hover {
             background: #2c3e50;
             transform: translateY(-1px);
         }
-        
+
         .export-btn i {
             font-size: 1rem;
         }
@@ -142,6 +143,7 @@
         }
     </style>
 </head>
+
 <body class="admin-dashboard">
     <div class="admin-container">
         <!-- Sidebar Navigation -->
@@ -150,7 +152,7 @@
                 <img src="../../images/logo.png" alt="Booktown Logo" class="admin-logo">
                 <h2>Admin Portal</h2>
             </div>
-            
+
             <nav class="sidebar-nav">
                 <a href="index.html" class="nav-item">
                     <i class="fas fa-tachometer-alt"></i>
@@ -170,16 +172,16 @@
                 </a>
                 <a href="analytics.html" class="nav-item active">
                     <i class="fas fa-chart-line"></i>
-                    <span>Analytics</span>
+                    <span>Requests</span>
                 </a>
             </nav>
-            
+
             <div class="sidebar-footer">
                 <div class="admin-profile">
-                    <img src="../../assets/images/default-profile.png" alt="Admin Profile">
+                    <!-- <img src="../../assets/images/default-profile.png" alt="Admin Profile"> -->
                     <div class="admin-info">
-                        <strong id="adminName">Loading...</strong>
-                        <small id="adminEmail">Loading...</small>
+                        <strong>Admin User</strong>
+                        <small>Super Admin</small>
                     </div>
                 </div>
                 <button class="logout-btn" onclick="signOut()">
@@ -187,10 +189,11 @@
                 </button>
             </div>
         </aside>
-        
+
         <main class="admin-main">
             <div class="admin-content">
-                <div class="welcome-banner" style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('../image-4@2x.png') center/cover;">
+                <div class="welcome-banner"
+                    style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('../image-4@2x.png') center/cover;">
                     <h1><i class="fas fa-chart-line"></i> Book Requests Analytics</h1>
                     <p>Monitor and manage book donation requests</p>
                 </div>
@@ -209,7 +212,8 @@
                     <div class="requests-table">
                         <div class="table-header">
                             <div class="d-flex gap-3">
-                                <input type="text" class="search-input" placeholder="Search requests..." id="searchInput">
+                                <input type="text" class="search-input" placeholder="Search requests..."
+                                    id="searchInput">
                                 <button class="export-btn" onclick="exportToCSV()">
                                     <i class="fas fa-download"></i> Export CSV
                                 </button>
@@ -238,6 +242,8 @@
     </div>
 
     <script src="../scripts/admin.js"></script>
+    <script src="../../scripts/script.js"></script>
+    <script src="../scripts/admin-auth.js"></script>
     <script>
         let allRequests = [];
 
@@ -279,7 +285,7 @@
             let filteredRequests = allRequests;
 
             if (searchTerm) {
-                filteredRequests = filteredRequests.filter(r => 
+                filteredRequests = filteredRequests.filter(r =>
                     r.books.title.toLowerCase().includes(searchTerm) ||
                     r.users.email.toLowerCase().includes(searchTerm) ||
                     r.contact_number.includes(searchTerm)
@@ -332,7 +338,7 @@
                 ]);
             });
 
-            const csvContent = csvRows.map(row => 
+            const csvContent = csvRows.map(row =>
                 row.map(cell => `"${cell}"`).join(',')
             ).join('\n');
 
@@ -364,4 +370,5 @@
         });
     </script>
 </body>
+
 </html>

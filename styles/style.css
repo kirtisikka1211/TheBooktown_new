@@ -84,7 +84,7 @@ header .container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 0;
+    padding: 5px 0;
 }
 
 .logo img {
@@ -932,7 +932,7 @@ footer {
 
 .dashboard-nav a {
     display: block;
-    padding: 12px 15px;
+    padding: 10px 12px;
     border-radius: 4px;
     color: var(--text);
     text-decoration: none;
