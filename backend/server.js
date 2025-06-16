@@ -126,14 +126,45 @@ async function ensureBucketExists() {
     }
 }
 
-// Call the function when the server starts
-ensureBucketExists().then(success => {
-    if (success) {
-        console.log('Storage bucket check completed successfully');
-    } else {
-        console.error('Failed to ensure storage bucket exists');
+async function ensureBookRequestsTable() {
+    try {
+        // Check if the table exists by attempting to select from it
+        const { error: checkError } = await supabase
+            .from('book_requests')
+            .select('id')
+            .limit(1);
+
+        if (checkError && checkError.code === '42P01') {
+            console.log('Book requests table does not exist, creating it...');
+            
+            // Create the table using SQL
+            const { error: createError } = await supabase.rpc('create_book_requests_table', {});
+
+            if (createError) {
+                console.error('Error creating book_requests table:', createError);
+                return false;
+            }
+
+            console.log('Created book_requests table successfully');
+            return true;
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Error in ensureBookRequestsTable:', error);
+        return false;
     }
-});
+}
+
+// Call both setup functions when server starts
+Promise.all([ensureBucketExists(), ensureBookRequestsTable()])
+    .then(([bucketSuccess, tableSuccess]) => {
+        if (bucketSuccess && tableSuccess) {
+            console.log('All storage and table checks completed successfully');
+        } else {
+            console.error('Failed to ensure all required resources exist');
+        }
+    });
 
 // API Routes
 // Get all users (admin only)
@@ -424,39 +455,74 @@ app.get('/api/books', authenticateToken, requireAdmin, async (req, res) => {
     }
 });
 
-// Get pending books
-app.get('/api/books/pending', async (req, res) => {
+// Get public approved books
+app.get('/api/public/books', async (req, res) => {
     try {
-        const { data: books, error } = await supabase
+        const query = supabase
             .from('books')
             .select(`
-                id,
-                title,
-                author,
-                genre,
-                language,
-                condition,
-                image_url,
-                summary,
-                created_at,
-                status
+                *,
+                users (
+                    username,
+                    email
+                )
             `)
-            .eq('status', 'pending')
+            .eq('status', 'approved')
             .order('created_at', { ascending: false });
 
+        const { data: books, error } = await query;
+        
         if (error) {
-            console.error('Error fetching pending books:', error);
-            return res.status(500).json({ error: 'Failed to fetch pending books' });
+            console.error('Supabase error:', error);
+            return res.status(500).json({ error: 'Failed to fetch books' });
         }
 
         res.json({ books });
+
+    } catch (error) {
+        console.error('Fetch books error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Get public book details by ID
+app.get('/api/public/books/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log('Fetching public book with ID:', id);
+        
+        const { data: book, error } = await supabase
+            .from('books')
+            .select(`
+                *,
+                users (
+                    username,
+                    email
+                )
+            `)
+            .eq('id', id)
+            .eq('status', 'approved')
+            .single();
+
+        if (error) {
+            console.error('Error fetching book:', error);
+            return res.status(500).json({ error: 'Failed to fetch book' });
+        }
+
+        if (!book) {
+            return res.status(404).json({ error: 'Book not found' });
+        }
+
+        console.log('Found book:', book);
+        res.json({ book });
+
     } catch (error) {
         console.error('Server error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
 
-// Get book by ID (must be after /api/books/pending)
+// Get book by ID
 app.get('/api/books/:id', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
@@ -668,6 +734,246 @@ app.patch('/api/books/:id', authenticateToken, requireAdmin, async (req, res) =>
 
     } catch (error) {
         console.error('Update book error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Create book request
+app.post('/api/books/:id/request', authenticateToken, async (req, res) => {
+    try {
+        const { id: bookId } = req.params;
+        const { address, contact_number } = req.body;
+        const userId = req.user.id;
+
+        // Validate required fields
+        if (!address || !contact_number) {
+            return res.status(400).json({ error: 'Address and contact number are required' });
+        }
+
+        // Validate contact number format
+        if (!/^\d{10}$/.test(contact_number)) {
+            return res.status(400).json({ error: 'Contact number must be 10 digits' });
+        }
+
+        // Check if book exists and is approved
+        const { data: book, error: bookError } = await supabase
+            .from('books')
+            .select('status')
+            .eq('id', bookId)
+            .single();
+
+        if (bookError || !book) {
+            return res.status(404).json({ error: 'Book not found' });
+        }
+
+        if (book.status !== 'approved') {
+            return res.status(400).json({ error: 'This book is not available for request' });
+        }
+
+        // Check if user has already requested this book
+        const { data: existingRequest, error: requestError } = await supabase
+            .from('book_requests')
+            .select('id')
+            .eq('book_id', bookId)
+            .eq('user_id', userId)
+            .eq('status', 'pending')
+            .single();
+
+        if (existingRequest) {
+            return res.status(400).json({ error: 'You have already requested this book' });
+        }
+
+        // Create the request
+        const { data: request, error: createError } = await supabase
+            .from('book_requests')
+            .insert([
+                {
+                    book_id: bookId,
+                    user_id: userId,
+                    address,
+                    contact_number
+                }
+            ])
+            .select()
+            .single();
+
+        if (createError) {
+            console.error('Error creating request:', createError);
+            return res.status(500).json({ error: 'Failed to create request' });
+        }
+
+        res.status(201).json({ request });
+
+    } catch (error) {
+        console.error('Request book error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Get user's book requests
+app.get('/api/my-requests', authenticateToken, async (req, res) => {
+    try {
+        const { data: requests, error } = await supabase
+            .from('book_requests')
+            .select('book_id')
+            .eq('user_id', req.user.id);
+
+        if (error) throw error;
+
+        res.json({ requests });
+    } catch (error) {
+        console.error('Error fetching user requests:', error);
+        res.status(500).json({ error: 'Failed to fetch requests' });
+    }
+});
+
+// Get all book requests with details for admin
+app.get('/api/admin/book-requests', authenticateToken, async (req, res) => {
+    try {
+        // Check if user is admin
+        const { data: adminData, error: adminError } = await supabase
+            .from('users')
+            .select('role')
+            .eq('id', req.user.id)
+            .single();
+
+        if (adminError) {
+            console.error('Error checking admin status:', adminError);
+            return res.status(500).json({ error: 'Failed to verify admin status' });
+        }
+
+        if (!adminData || adminData.role !== 'admin') {
+            return res.status(403).json({ error: 'Unauthorized access' });
+        }
+
+        // Fetch book requests with related data
+        const { data: requests, error: requestsError } = await supabase
+            .from('book_requests')
+            .select(`
+                *,
+                books (
+                    title,
+                    author,
+                    genre,
+                    image_url
+                ),
+                users (
+                    email,
+                    fullname
+                )
+            `)
+            .order('created_at', { ascending: false });
+
+        if (requestsError) {
+            console.error('Error fetching book requests:', requestsError);
+            return res.status(500).json({ error: 'Failed to fetch book requests' });
+        }
+
+        // Ensure all required data is present and map the fullname to name for frontend consistency
+        const validRequests = requests
+            .filter(request => 
+                request.books && 
+                request.users && 
+                request.books.title && 
+                request.users.email
+            )
+            .map(request => ({
+                ...request,
+                users: {
+                    ...request.users,
+                    name: request.users.fullname // Map fullname to name for frontend
+                }
+            }));
+
+        res.json({ requests: validRequests });
+    } catch (error) {
+        console.error('Error in book requests endpoint:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Update book request status (admin only)
+app.put('/api/admin/book-requests/:id/status', authenticateToken, async (req, res) => {
+    try {
+        // Check if user is admin
+        const { data: adminData, error: adminError } = await supabase
+            .from('users')
+            .select('role')
+            .eq('id', req.user.id)
+            .single();
+
+        if (adminError || adminData.role !== 'admin') {
+            return res.status(403).json({ error: 'Unauthorized access' });
+        }
+
+        const { id } = req.params;
+        const { status } = req.body;
+
+        if (!['pending', 'approved', 'rejected'].includes(status)) {
+            return res.status(400).json({ error: 'Invalid status' });
+        }
+
+        // Update request status
+        const { error } = await supabase
+            .from('book_requests')
+            .update({ status })
+            .eq('id', id);
+
+        if (error) throw error;
+
+        res.json({ message: 'Status updated successfully' });
+    } catch (error) {
+        console.error('Error updating request status:', error);
+        res.status(500).json({ error: 'Failed to update status' });
+    }
+});
+
+// Delete book (admin only)
+app.delete('/api/books/:id', authenticateToken, async (req, res) => {
+    try {
+        // Check if user is admin
+        const { data: adminData, error: adminError } = await supabase
+            .from('users')
+            .select('role')
+            .eq('id', req.user.id)
+            .single();
+
+        if (adminError || adminData.role !== 'admin') {
+            return res.status(403).json({ error: 'Unauthorized access' });
+        }
+
+        const { id } = req.params;
+
+        // First check if there are any pending requests for this book
+        const { data: requests, error: requestError } = await supabase
+            .from('book_requests')
+            .select('id')
+            .eq('book_id', id)
+            .eq('status', 'pending');
+
+        if (requestError) {
+            console.error('Error checking book requests:', requestError);
+            return res.status(500).json({ error: 'Failed to check book requests' });
+        }
+
+        if (requests && requests.length > 0) {
+            return res.status(400).json({ error: 'Cannot delete book with pending requests' });
+        }
+
+        // Delete the book
+        const { error: deleteError } = await supabase
+            .from('books')
+            .delete()
+            .eq('id', id);
+
+        if (deleteError) {
+            console.error('Error deleting book:', deleteError);
+            return res.status(500).json({ error: 'Failed to delete book' });
+        }
+
+        res.json({ message: 'Book deleted successfully' });
+    } catch (error) {
+        console.error('Error in delete book endpoint:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });

@@ -7,12 +7,145 @@
     <link rel="stylesheet" href="../styles/admin.css">
     <link rel="stylesheet" href="../../styles/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.css">
+    <style>
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+        }
+        
+        .stat-card {
+            background: #1a2634;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .stat-card i {
+            font-size: 2rem;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 50%;
+        }
+        
+        .stat-card .stat-content {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .stat-card h3 {
+            font-size: 2.5rem;
+            margin: 0;
+            font-weight: 600;
+            color: #fff;
+        }
+        
+        .stat-card p {
+            margin: 0;
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .requests-table {
+            background: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            margin-top: 2rem;
+        }
+        
+        .table-header {
+            background: var(--header-bg);
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .book-image {
+            width: 50px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        
+        .filters {
+            display: none;
+        }
+        
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            background: transparent;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .filter-btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .export-btn {
+            background: #1a2634;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .export-btn:hover {
+            background: #2c3e50;
+            transform: translateY(-1px);
+        }
+        
+        .export-btn i {
+            font-size: 1rem;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .analytics-content {
+            padding: 2rem;
+        }
+
+        /* Remove status-related styles */
+        .status-pending,
+        .status-approved,
+        .status-rejected,
+        .status-badge,
+        .btn-action {
+            display: none;
+        }
+    </style>
 </head>
 <body class="admin-dashboard">
     <div class="admin-container">
-         <!-- Sidebar Navigation -->
-         <aside class="admin-sidebar">
+        <!-- Sidebar Navigation -->
+        <aside class="admin-sidebar">
             <div class="sidebar-header">
                 <img src="../../images/logo.png" alt="Booktown Logo" class="admin-logo">
                 <h2>Admin Portal</h2>
@@ -26,7 +159,6 @@
                 <a href="moderation.html" class="nav-item">
                     <i class="fas fa-shield-alt"></i>
                     <span>Moderation</span>
-                    <span class="badge">12</span>
                 </a>
                 <a href="users.html" class="nav-item">
                     <i class="fas fa-users"></i>
@@ -46,8 +178,8 @@
                 <div class="admin-profile">
                     <img src="../../assets/images/default-profile.png" alt="Admin Profile">
                     <div class="admin-info">
-                        <strong>Loading...</strong>
-                        <small>Loading...</small>
+                        <strong id="adminName">Loading...</strong>
+                        <small id="adminEmail">Loading...</small>
                     </div>
                 </div>
                 <button class="logout-btn" onclick="signOut()">
@@ -57,151 +189,179 @@
         </aside>
         
         <main class="admin-main">
-            <!-- <header class="admin-toolbar">
-                <div class="time-filter">
-                    <select class="filter-select">
-                        <option>Last 7 Days</option>
-                        <option>Last 30 Days</option>
-                        <option>Last 90 Days</option>
-                        <option>This Year</option>
-                        <option>Custom Range</option>
-                    </select>
-                </div>
-                <div class="toolbar-actions">
-                    <button class="btn btn-secondary">
-                        <i class="fas fa-download"></i> Export Report
-                    </button>
-                </div>
-            </header> -->
-            
             <div class="admin-content">
                 <div class="welcome-banner" style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('../image-4@2x.png') center/cover;">
-                    <h1><i class="fas fa-chart-line"></i> System Analytics</h1>
-                    <p>Key metrics and performance indicators</p>
+                    <h1><i class="fas fa-chart-line"></i> Book Requests Analytics</h1>
+                    <p>Monitor and manage book donation requests</p>
                 </div>
-                
-                <div class="analytics-highlights">
-                    <div class="highlight-card">
-                        <div class="highlight-value">1,248</div>
-                        <div class="highlight-label">Total Users</div>
-                        <div class="highlight-change positive">
-                            <i class="fas fa-arrow-up"></i> 12% from last month
+
+                <div class="analytics-content">
+                    <div class="stats-cards">
+                        <div class="stat-card">
+                            <i class="fas fa-book-reader"></i>
+                            <div class="stat-content">
+                                <h3 id="totalRequests">0</h3>
+                                <p>Total Requests</p>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="highlight-card">
-                        <div class="highlight-value">5,672</div>
-                        <div class="highlight-label">Books Donated</div>
-                        <div class="highlight-change positive">
-                            <i class="fas fa-arrow-up"></i> 8% from last month
+
+                    <div class="requests-table">
+                        <div class="table-header">
+                            <div class="d-flex gap-3">
+                                <input type="text" class="search-input" placeholder="Search requests..." id="searchInput">
+                                <button class="export-btn" onclick="exportToCSV()">
+                                    <i class="fas fa-download"></i> Export CSV
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="highlight-card">
-                        <div class="highlight-value">1,894</div>
-                        <div class="highlight-label">Books Exchanged</div>
-                        <div class="highlight-change neutral">
-                            <i class="fas fa-minus"></i> No change
+                        <div class="table-responsive">
+                            <table class="analytics-table">
+                                <thead>
+                                    <tr>
+                                        <th>Book</th>
+                                        <th>Requester</th>
+                                        <th>Contact</th>
+                                        <th>Address</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="requestsTableBody">
+                                    <!-- Table rows will be dynamically populated -->
+                                </tbody>
+                            </table>
                         </div>
-                    </div>
-                    
-                    <div class="highlight-card">
-                        <div class="highlight-value">87%</div>
-                        <div class="highlight-label">User Retention</div>
-                        <div class="highlight-change positive">
-                            <i class="fas fa-arrow-up"></i> 3% from last quarter
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="analytics-charts">
-                    <div class="chart-card">
-                        <h3><i class="fas fa-chart-bar"></i> Monthly Donations</h3>
-                        <div class="chart-container">
-                            <canvas id="donationsChart"></canvas>
-                        </div>
-                    </div>
-                    
-                    <div class="chart-card">
-                        <h3><i class="fas fa-chart-pie"></i> Book Categories</h3>
-                        <div class="chart-container">
-                            <canvas id="categoriesChart"></canvas>
-                        </div>
-                    </div>
-                    
-                    <div class="chart-card">
-                        <h3><i class="fas fa-users"></i> User Growth</h3>
-                        <div class="chart-container">
-                            <canvas id="usersChart"></canvas>
-                        </div>
-                    </div>
-                    
-                    <div class="chart-card">
-                        <h3><i class="fas fa-map-marker-alt"></i> Geographic Distribution</h3>
-                        <div class="chart-container">
-                            <canvas id="locationChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="analytics-tables">
-                    <div class="table-card">
-                        <h3><i class="fas fa-star"></i> Top Donors</h3>
-                        <table class="analytics-table">
-                            <thead>
-                                <tr>
-                                    <th>User</th>
-                                    <th>Books Donated</th>
-                                    <th>Last Donation</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <div class="user-cell">
-                                            <img src="../../images/user1.jpg" alt="User">
-                                            <span>Sarah Johnson</span>
-                                        </div>
-                                    </td>
-                                    <td>142</td>
-                                    <td>2 days ago</td>
-                                </tr>
-                                <!-- More rows -->
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="table-card">
-                        <h3><i class="fas fa-book"></i> Most Popular Books</h3>
-                        <table class="analytics-table">
-                            <thead>
-                                <tr>
-                                    <th>Book</th>
-                                    <th>Requests</th>
-                                    <th>Availability</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <div class="book-cell">
-                                            <img src="../../book_images/book1.jpg" alt="Book">
-                                            <span>The Midnight Library</span>
-                                        </div>
-                                    </td>
-                                    <td>87</td>
-                                    <td><span class="badge available">Available</span></td>
-                                </tr>
-                                <!-- More rows -->
-                            </tbody>
-                        </table>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
     <script src="../scripts/admin.js"></script>
+    <script>
+        let allRequests = [];
+
+        async function fetchRequests() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    window.location.href = '/pages/login.html';
+                    return;
+                }
+
+                const response = await fetch('http://localhost:3001/api/admin/book-requests', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to fetch requests');
+                }
+
+                const data = await response.json();
+                allRequests = data.requests || [];
+                updateDashboard();
+                filterAndDisplayRequests();
+            } catch (error) {
+                console.error('Error:', error);
+                showToast(error.message || 'Failed to load requests', 'error');
+            }
+        }
+
+        function updateDashboard() {
+            document.getElementById('totalRequests').textContent = allRequests.length;
+        }
+
+        function filterAndDisplayRequests() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            let filteredRequests = allRequests;
+
+            if (searchTerm) {
+                filteredRequests = filteredRequests.filter(r => 
+                    r.books.title.toLowerCase().includes(searchTerm) ||
+                    r.users.email.toLowerCase().includes(searchTerm) ||
+                    r.contact_number.includes(searchTerm)
+                );
+            }
+
+            const tbody = document.getElementById('requestsTableBody');
+            tbody.innerHTML = '';
+
+            filteredRequests.forEach(request => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div class="book-cell">
+                            <img src="${request.books.image_url || '../../images/default-book.jpg'}" 
+                                 alt="${request.books.title}" 
+                                 class="book-image">
+                            <div>
+                                <strong>${request.books.title}</strong>
+                                <small>${request.books.author}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div>${request.users.name || 'N/A'}</div>
+                        <small>${request.users.email}</small>
+                    </td>
+                    <td>${request.contact_number}</td>
+                    <td>${request.address}</td>
+                    <td>${new Date(request.created_at).toLocaleDateString()}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function exportToCSV() {
+            const csvRows = [
+                ['Book Title', 'Author', 'Requester Name', 'Email', 'Contact', 'Address', 'Date']
+            ];
+
+            allRequests.forEach(r => {
+                csvRows.push([
+                    r.books.title,
+                    r.books.author,
+                    r.users.name || 'N/A',
+                    r.users.email,
+                    r.contact_number,
+                    r.address,
+                    new Date(r.created_at).toLocaleDateString()
+                ]);
+            });
+
+            const csvContent = csvRows.map(row => 
+                row.map(cell => `"${cell}"`).join(',')
+            ).join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `book_requests_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchRequests();
+
+            // Search input
+            document.getElementById('searchInput').addEventListener('input', () => {
+                filterAndDisplayRequests();
+            });
+
+            // Load admin info
+            const adminName = document.getElementById('adminName');
+            const adminEmail = document.getElementById('adminEmail');
+            const token = localStorage.getItem('token');
+            if (token) {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                adminEmail.textContent = payload.email;
+                adminName.textContent = payload.name || 'Admin';
+            }
+        });
+    </script>
 </body>
 </html>

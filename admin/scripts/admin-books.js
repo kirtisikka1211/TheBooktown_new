@@ -65,6 +65,9 @@ function createBookCard(book) {
                 <button class="btn btn-sm btn-outline" onclick="viewBookDetails('${book.id}')">
                     <i class="fas fa-info-circle"></i> Details
                 </button>
+                <button class="btn btn-sm btn-danger" onclick="showDeleteModal('${book.id}', '${book.title.replace(/'/g, "\\'")}')">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
             </div>
         </div>
     `;
