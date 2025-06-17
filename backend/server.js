@@ -106,7 +106,7 @@ async function ensureBucketExists() {
             const { data, error: createError } = await supabase
                 .storage
                 .createBucket('book-images', {
-                    public: true,
+                    private: true,
                     fileSizeLimit: 5242880, // 5MB in bytes
                     allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif']
                 });
