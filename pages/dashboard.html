@@ -191,22 +191,139 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Tab Styles */
+        .dashboard-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .tab-button {
+            padding: 1rem 2rem;
+            background: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tab-button.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-button i {
+            margin-right: 0.5rem;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Request Card Styles */
+        .request-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            display: flex;
+            margin-bottom: 1rem;
+        }
+
+        .request-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .request-book-cover {
+            width: 120px;
+            height: 160px;
+            overflow: hidden;
+        }
+
+        .request-book-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .request-details {
+            padding: 1.5rem;
+            flex: 1;
+        }
+
+        .request-details h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        .request-meta {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .request-status {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-tabs {
+                flex-direction: column;
+            }
+
+            .request-card {
+                flex-direction: column;
+            }
+
+            .request-book-cover {
+                width: 100%;
+                height: 200px;
+            }
+        }
     </style>
 </head>
 <body>
     <div id="navbar-container"></div>
     <section class="page-header">
-            <div class="container">
-                <h1>My Dashboard</h1>
-                <p>Track and manage your book donations</p>
-            </div>
-        </section>
-    <div class="dashboard-container">
-        <!-- <div class="welcome-banner">
+        <div class="container">
             <h1>My Dashboard</h1>
-            <p>Track and manage your book donations</p>
-        </div> -->
-
+            <p>Track and manage your book donations and requests</p>
+        </div>
+    </section>
+    <div class="dashboard-container">
         <div class="stats-cards">
             <div class="stat-card">
                 <div class="stat-icon">
@@ -237,15 +354,37 @@
             </div>
         </div>
 
-        <div class="books-section">
-            <div class="section-header">
-                <h2><i class="fas fa-book"></i> My Donated Books</h2>
-                <button class="btn-primary" onclick="handleNewDonation()">
-                    <i class="fas fa-plus"></i> New Donation
-                </button>
+        <div class="dashboard-tabs">
+            <button class="tab-button active" onclick="showTab('donations')">
+                <i class="fas fa-book"></i> My Donations
+            </button>
+            <button class="tab-button" onclick="showTab('requests')">
+                <i class="fas fa-hand-holding"></i> My Requests
+            </button>
+        </div>
+
+        <div id="donations-tab" class="tab-content active">
+            <div class="books-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-book"></i> My Donated Books</h2>
+                    <button class="btn-primary" onclick="handleNewDonation()">
+                        <i class="fas fa-plus"></i> New Donation
+                    </button>
+                </div>
+                <div class="books-grid">
+                    <!-- Books will be loaded dynamically -->
+                </div>
             </div>
-            <div class="books-grid">
-                <!-- Books will be loaded dynamically -->
+        </div>
+
+        <div id="requests-tab" class="tab-content">
+            <div class="books-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-hand-holding"></i> My Book Requests</h2>
+                </div>
+                <div class="requests-list">
+                    <!-- Requests will be loaded dynamically -->
+                </div>
             </div>
         </div>
     </div>
@@ -255,5 +394,20 @@
     <script src="../scripts/components.js"></script>
     <script src="../scripts/auth.js"></script>
     <script src="../scripts/dashboard.js"></script>
+    <script>
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
+        }
+    </script>
 </body>
 </html>
