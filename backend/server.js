@@ -416,46 +416,90 @@ app.post('/api/donate-book', authenticateToken, upload.single('image'), async (r
     }
 });
 
-// Get all books (admin only)
+// Book Routes
+// Get all books
 app.get('/api/books', authenticateToken, requireAdmin, async (req, res) => {
     try {
-        const { status } = req.query;
-        console.log('Fetching books with status:', status);
-        
-        const query = supabase
+        const { data: books, error } = await supabase
             .from('books')
-            .select(`
-                *,
-                users (
-                    username,
-                    email
-                )
-            `)
+            .select('*')
             .order('created_at', { ascending: false });
 
-        if (status) {
-            console.log('Filtering by status:', status);
-            query.eq('status', status);
-        }
+        if (error) throw error;
+        res.json({ books });
+    } catch (error) {
+        console.error('Error fetching books:', error);
+        res.status(500).json({ error: 'Failed to fetch books' });
+    }
+});
 
-        const { data: books, error } = await query;
-        
-        console.log('Query result:', { books, error });
+// Get user's book requests
+app.get('/api/books/user-requests', authenticateToken, async (req, res) => {
+    try {
+        const { data: requests, error } = await supabase
+            .from('book_requests')
+            .select(`
+                id,
+                book_id,
+                user_id,
+                status,
+                address,
+                contact_number,
+                created_at,
+                updated_at,
+                books!book_id (
+                    id,
+                    title,
+                    author,
+                    image_url,
+                    users!user_id (
+                        id,
+                        fullname
+                    )
+                )
+            `)
+            .eq('user_id', req.user.id)
+            .order('created_at', { ascending: false });
 
         if (error) {
-            console.error('Supabase error:', error);
-            return res.status(500).json({ error: 'Failed to fetch books' });
+            console.error('Error fetching user requests:', error);
+            return res.status(500).json({ error: 'Failed to fetch requests' });
         }
 
-        res.json({ books });
-
+        res.json(requests);
     } catch (error) {
-        console.error('Fetch books error:', error);
+        console.error('Server error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
 
-// Get public approved books
+// Get a specific book by ID
+app.get('/api/books/:id', authenticateToken, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { data: book, error } = await supabase
+            .from('books')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error) {
+            console.error('Error fetching book:', error);
+            return res.status(500).json({ error: 'Failed to fetch book' });
+        }
+
+        if (!book) {
+            return res.status(404).json({ error: 'Book not found' });
+        }
+
+        res.json(book);
+    } catch (error) {
+        console.error('Server error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Get all books (admin only)
 app.get('/api/public/books', async (req, res) => {
     try {
         const query = supabase
@@ -502,42 +546,6 @@ app.get('/api/public/books/:id', async (req, res) => {
             `)
             .eq('id', id)
             .eq('status', 'approved')
-            .single();
-
-        if (error) {
-            console.error('Error fetching book:', error);
-            return res.status(500).json({ error: 'Failed to fetch book' });
-        }
-
-        if (!book) {
-            return res.status(404).json({ error: 'Book not found' });
-        }
-
-        console.log('Found book:', book);
-        res.json({ book });
-
-    } catch (error) {
-        console.error('Server error:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
-
-// Get book by ID
-app.get('/api/books/:id', authenticateToken, async (req, res) => {
-    try {
-        const { id } = req.params;
-        console.log('Fetching book with ID:', id);
-        
-        const { data: book, error } = await supabase
-            .from('books')
-            .select(`
-                *,
-                users (
-                    username,
-                    email
-                )
-            `)
-            .eq('id', id)
             .single();
 
         if (error) {
@@ -807,23 +815,6 @@ app.post('/api/books/:id/request', authenticateToken, async (req, res) => {
     } catch (error) {
         console.error('Request book error:', error);
         res.status(500).json({ error: 'Internal server error' });
-    }
-});
-
-// Get user's book requests
-app.get('/api/my-requests', authenticateToken, async (req, res) => {
-    try {
-        const { data: requests, error } = await supabase
-            .from('book_requests')
-            .select('book_id')
-            .eq('user_id', req.user.id);
-
-        if (error) throw error;
-
-        res.json({ requests });
-    } catch (error) {
-        console.error('Error fetching user requests:', error);
-        res.status(500).json({ error: 'Failed to fetch requests' });
     }
 });
 

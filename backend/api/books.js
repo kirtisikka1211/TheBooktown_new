@@ -67,5 +67,29 @@ export const booksApi = {
     
     if (error) throw error
     return true
+  },
+
+  // Get user's book requests
+  async getUserRequests(userId) {
+    const { data, error } = await supabase
+      .from('book_requests')
+      .select(`
+        *,
+        book:books (
+          id,
+          title,
+          author,
+          image_url,
+          donor:user_id (
+            id,
+            full_name
+          )
+        )
+      `)
+      .eq('requester_id', userId)
+      .order('created_at', { ascending: false })
+    
+    if (error) throw error
+    return data
   }
 } 

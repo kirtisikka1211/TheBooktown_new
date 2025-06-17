@@ -163,7 +163,7 @@ async function loadUserRequests() {
             return;
         }
 
-        const response = await fetch('/api/books/user-requests', {
+        const response = await fetch('https://thebooktown-new-1.onrender.com/api/books/user-requests', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -175,7 +175,7 @@ async function loadUserRequests() {
         displayRequests(requests);
     } catch (error) {
         console.error('Error loading requests:', error);
-        // Handle error appropriately
+        showToast('Error loading your requests', 'error');
     }
 }
 
@@ -234,14 +234,16 @@ function displayRequests(requests) {
     requestsList.innerHTML = requests.map(request => `
         <div class="request-card">
             <div class="request-book-cover">
-                <img src="${request.book.coverImage || '../images/default-book.png'}" alt="${request.book.title}">
+                <img src="${request.books?.image_url || '../images/default-book.png'}" alt="${request.books?.title}">
             </div>
             <div class="request-details">
-                <h3>${request.book.title}</h3>
-                <p class="author">${request.book.author}</p>
+                <h3>${request.books?.title}</h3>
+                <p class="author">${request.books?.author}</p>
                 <div class="request-meta">
-                    <span><i class="fas fa-calendar"></i> Requested on ${new Date(request.requestedAt).toLocaleDateString()}</span>
-                    <span><i class="fas fa-user"></i> Donor: ${request.book.donorName}</span>
+                    <span><i class="fas fa-calendar"></i> Requested on ${new Date(request.created_at).toLocaleDateString()}</span>
+                    <span><i class="fas fa-user"></i> Donor: ${request.books?.users?.fullname || 'Anonymous'}</span>
+                    <span><i class="fas fa-map-marker-alt"></i> ${request.address}</span>
+                    <span><i class="fas fa-phone"></i> ${request.contact_number}</span>
                     <span class="request-status status-${request.status.toLowerCase()}">${request.status}</span>
                 </div>
             </div>
